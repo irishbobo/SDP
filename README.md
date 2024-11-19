@@ -1,4 +1,4 @@
-# diet plan app
+# Fridge Maid app
 
 A new Flutter project.
 
