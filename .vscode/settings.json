@@ -1,7 +1,0 @@
-{
-    "java.compile.nullAnalysis.mode": "automatic",
-    "avdmanager.executable": "/Users/Zeina/Desktop/Android/sdk/cmdline-tools/latest/bin/avdmanager",
-    "avdmanager.sdkManager": "/Users/Zeina/Desktop/Android/sdk/cmdline-tools/latest/bin/sdkmanager",
-    "avdmanager.avdHome": "/Users/Zeina/Desktop/Android/sdk/cmdline-tools/latest/bin/avdmanager",
-    "avdmanager.emulator": "/Users/Zeina/Desktop/Android/sdk/emulator"
-}
