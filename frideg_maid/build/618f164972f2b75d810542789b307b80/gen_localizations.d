@@ -1,1 +1,0 @@
- C:\\Users\\irish\\Documents\\SDP\\SDP\\frideg_maid\\.dart_tool\\flutter_gen\\gen_l10n\\app_localizations_en.dart C:\\Users\\irish\\Documents\\SDP\\SDP\\frideg_maid\\.dart_tool\\flutter_gen\\gen_l10n\\app_localizations.dart:  C:\\Users\\irish\\Documents\\SDP\\SDP\\frideg_maid\\l10n.yaml C:\\Users\\irish\\Documents\\SDP\\SDP\\frideg_maid\\lib/src/localization\\app_en.arb
