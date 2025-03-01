@@ -112,124 +112,168 @@ class _PageTwoState extends State<PageTwo> {
   String dropdownvalue = 'Breakfast';
 
   void _addCalories() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        TextEditingController calorieController = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      TextEditingController calorieController = TextEditingController();
 
-        return AlertDialog(
-          title: const Text('Add Calories'),
-          content: TextField(
-            controller: calorieController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(hintText: 'Enter calories'),
-          ),
-          actions: [
-            DropdownButtonFormField<String>(
-              items: <String>['Daily Calorie View', 'Weekly Calorie View']
-                  .map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              hint: const Text(
-                  'Enter Max Calories Preferences (Daily or weekly)'),
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropdownvalue = newValue!;
-                });
-              },
-            ),
-            DropdownButtonFormField<String>(
-              items: <String>['Breakfast', 'Lunch', 'Dinner', 'Snack']
-                  .map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              hint: const Text('Enter Meal'),
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropdownvalue = newValue!;
-                });
-              },
-            ),
-            const Text(" "),
-            IconButton(
-              // Profile icon
-              icon: const Row(
+      return Dialog(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Adjust width based on screen width
+            double dialogWidth = constraints.maxWidth * 0.4; // 80% of screen width
+            double dialogHeight = constraints.maxHeight * 0.65; // 80% of screen height
+
+            return Container(
+              width: dialogWidth,
+              height: dialogHeight,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.list),
-                  Text(" Calorie Tracker Homepage"),
+                  // Title
+                  const Text(
+                    'Add Calories',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Calorie input field
+                  TextField(
+                    controller: calorieController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter calories',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Dropdown for calorie preferences (Daily or Weekly)
+                  DropdownButtonFormField<String>(
+                    items: <String>['Daily Calorie View', 'Weekly Calorie View']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    hint: const Text('Enter Max Calories Preferences (Daily or weekly)'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownvalue = newValue!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Dropdown for meal selection
+                  DropdownButtonFormField<String>(
+                    items: <String>['Breakfast', 'Lunch', 'Dinner', 'Snack']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    hint: const Text('Enter Meal'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownvalue = newValue!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Buttons for navigation (to different pages)
+                  Column(
+                    children: [
+                      IconButton(
+                        icon: const Row(
+                          children: [
+                            Icon(Icons.list),
+                            Text(" Calorie Tracker Homepage"),
+                          ],
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CalorieTrackerHome(),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Row(
+                          children: [
+                            Icon(Icons.list),
+                            Text(" Calorie Calculator"),
+                          ],
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CalorieCalculator(),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Row(
+                          children: [
+                            Icon(Icons.list),
+                            Text(" BMI Calculator"),
+                          ],
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BMICalculator(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Cancel and Add buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _calories += double.tryParse(calorieController.text) ?? 0.0;
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Add'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              onPressed: () {
-                // Navigate to the Calorie Tracker Home when clicked
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CalorieTrackerHome(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              // Profile icon
-              icon: const Row(
-                children: [
-                  Icon(Icons.list),
-                  Text(" Calorie Calculator"),
-                ],
-              ),
-              onPressed: () {
-                // Navigate to the Calorie Calculator when clicked
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CalorieCalculator(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              // Profile icon
-              icon: const Row(
-                children: [
-                  Icon(Icons.list),
-                  Text(" BMI Calculator"),
-                ],
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BMICalculator(),
-                  ),
-                );
-              },
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _calories += double.tryParse(calorieController.text) ?? 0.0;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+            );
+          },
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +284,7 @@ class _PageTwoState extends State<PageTwo> {
       body: Column(
         children: [
           SizedBox(
-            height: 150, // Adjust the height as needed
+            height: 132, // Adjust the height as needed
             child: TableCalendar(
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
@@ -317,6 +361,10 @@ class _PageTwoState extends State<PageTwo> {
                             ),
                             Text(
                               '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              'of 2000 cal',
                               style: const TextStyle(fontSize: 16),
                             ),
                             Text(
@@ -463,7 +511,7 @@ class _PageSixState extends State<PageSix> {
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  double _calories = 0.0;
+  /*double _calories = 0.0;*/
 
   final TextEditingController breakfastCaloriesController =
       TextEditingController();
@@ -711,7 +759,7 @@ class _PageSixState extends State<PageSix> {
               children: [
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Breakfast:',
+                    title: 'Breakfast:' + '  (350 Calories today...)',
                     caloriesController: breakfastCaloriesController,
                     descriptionController: breakfastDescriptionController,
                     onSave: () {
@@ -723,7 +771,7 @@ class _PageSixState extends State<PageSix> {
                 SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Lunch:',
+                    title: 'Lunch:' + '  (450 Calories today...)',
                     caloriesController: lunchCaloriesController,
                     descriptionController: lunchDescriptionController,
                     onSave: () {
@@ -735,7 +783,7 @@ class _PageSixState extends State<PageSix> {
                 SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Dinner:',
+                    title: 'Dinner:' + '  (850 Calories today...)',
                     caloriesController: dinnerCaloriesController,
                     descriptionController: dinnerDescriptionController,
                     onSave: () {
@@ -747,7 +795,7 @@ class _PageSixState extends State<PageSix> {
                 SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Snack:',
+                    title: 'Snack:' + '  (150 Calories today...)',
                     caloriesController: snackCaloriesController,
                     descriptionController: snackDescriptionController,
                     onSave: () {
@@ -801,16 +849,18 @@ class MealCategoryBox extends StatelessWidget {
           ),
           SizedBox(height: 8), // Space between title and input fields
 
+          
           // Calorie Input Field
           TextField(
             controller: caloriesController,
             decoration: InputDecoration(
-              labelText: 'Calories',
+              labelText: 'Add Calories',
               border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
           ),
           SizedBox(height: 8), // Space between calorie and description input fields
+
 
           // Description Input Field
           TextField(
@@ -822,6 +872,7 @@ class MealCategoryBox extends StatelessWidget {
             maxLines: 2, // Multi-line input for description
           ),
           SizedBox(height: 16), // Space for the button
+
 
           // Save Button
           ElevatedButton(
