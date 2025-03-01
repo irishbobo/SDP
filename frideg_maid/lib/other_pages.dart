@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frideg_maid/calorie_calculator_page.dart';
+import 'package:frideg_maid/calorie_tracker_home_page.dart';
 import 'add_food_page.dart'; // Import the AddFoodPage
 import 'food_detail_page.dart'; // Import the food detail page
 import 'add_recipe_page.dart';
 import 'recipe_detail_page.dart';
+import 'bmi_calculator_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
@@ -106,6 +109,7 @@ class _PageTwoState extends State<PageTwo> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   double _calories = 0.0;
+  String dropdownvalue = 'Breakfast';
 
   void _addCalories() {
     showDialog(
@@ -121,6 +125,91 @@ class _PageTwoState extends State<PageTwo> {
             decoration: const InputDecoration(hintText: 'Enter calories'),
           ),
           actions: [
+            DropdownButtonFormField<String>(
+              items: <String>['Daily Calorie View', 'Weekly Calorie View']
+                  .map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              hint: const Text(
+                  'Enter Max Calories Preferences (Daily or weekly)'),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownvalue = newValue!;
+                });
+              },
+            ),
+            DropdownButtonFormField<String>(
+              items: <String>['Breakfast', 'Lunch', 'Dinner', 'Snack']
+                  .map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              hint: const Text('Enter Meal'),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownvalue = newValue!;
+                });
+              },
+            ),
+            const Text(" "),
+            IconButton(
+              // Profile icon
+              icon: const Row(
+                children: [
+                  Icon(Icons.list),
+                  Text(" Calorie Tracker Homepage"),
+                ],
+              ),
+              onPressed: () {
+                // Navigate to the Calorie Tracker Home when clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CalorieTrackerHome(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              // Profile icon
+              icon: const Row(
+                children: [
+                  Icon(Icons.list),
+                  Text(" Calorie Calculator"),
+                ],
+              ),
+              onPressed: () {
+                // Navigate to the Calorie Calculator when clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CalorieCalculator(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              // Profile icon
+              icon: const Row(
+                children: [
+                  Icon(Icons.list),
+                  Text(" BMI Calculator"),
+                ],
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BMICalculator(),
+                  ),
+                );
+              },
+            ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -229,6 +318,10 @@ class _PageTwoState extends State<PageTwo> {
                             Text(
                               '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
                               style: const TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              'Total',
+                              style: const TextStyle(fontSize: 22),
                             ),
                           ],
                         ),
@@ -355,3 +448,702 @@ class _PageFiveState extends State<PageFive> {
     );
   }
 }
+
+// Page 6 Calorie Tracker Home
+
+
+class PageSix extends StatefulWidget {
+  const PageSix({super.key});
+
+  @override
+  _PageSixState createState() => _PageSixState();
+}
+
+class _PageSixState extends State<PageSix> {
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  double _calories = 0.0;
+
+  final TextEditingController breakfastCaloriesController =
+      TextEditingController();
+  final TextEditingController lunchCaloriesController = TextEditingController();
+  final TextEditingController dinnerCaloriesController =
+      TextEditingController();
+  final TextEditingController snackCaloriesController =
+      TextEditingController();
+  final TextEditingController breakfastDescriptionController =
+      TextEditingController();
+  final TextEditingController lunchDescriptionController =
+      TextEditingController();
+  final TextEditingController dinnerDescriptionController =
+      TextEditingController();
+  final TextEditingController snackDescriptionController =
+      TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calorie Tracker Home'),
+      ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 132, // Adjust the height as needed
+            child: TableCalendar(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              calendarFormat: _calendarFormat,
+              availableCalendarFormats: const {
+                CalendarFormat.week: 'Week'
+              }, // Only week view
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay; // update `_focusedDay` here as well
+                });
+              },
+              onPageChanged: (focusedDay) {
+                _focusedDay = focusedDay;
+              },
+              calendarStyle: const CalendarStyle(
+                selectedDecoration: BoxDecoration(
+                  color: Colors.green, // Color the selected day green
+                  shape: BoxShape.circle,
+                ),
+                todayDecoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false, // Hide the format button
+                titleCentered: true,
+                titleTextStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ), // Placeholder for TableCalendar (to be replaced with actual TableCalendar widget)
+          ),
+          const Divider(
+            thickness: 2, // Adjust the thickness as needed
+            color: Colors.grey, // Adjust the color as needed
+          ),
+
+          // Content above the bottom boxes (if any)
+          Expanded(
+            child: Row(
+              children: [
+                
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+
+                        //Use below to remembr the settings and variables: _calories
+                        /*percent: _calories / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${_calories.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Total'),
+                          ],
+                        ),*/
+
+                        percent: 1800 / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${1800.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 17),
+                            ),
+                            Text(
+                              '${(1800 / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Total'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: 350 / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${350.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            Text(
+                              '${(350 / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Breakfast'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: 450 / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${450.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            Text(
+                              '${(450/ 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Lunch'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: 850 / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${850.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            Text(
+                              '${(850 / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Dinner'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: 150 / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${150.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            Text(
+                              '${(150 / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Snack'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),          
+              ],
+            ),
+          ), // Placeholder for other content
+
+          const Divider(
+            thickness: 2, // Adjust the thickness as needed
+            color: Colors.grey, // Adjust the color as needed
+          ),
+
+          // The Row containing the four boxes at the bottom of the screen
+          Padding(
+            padding: const EdgeInsets.all(16.0), // Add padding to create space around the boxes
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: MealCategoryBox(
+                    title: 'Breakfast:',
+                    caloriesController: breakfastCaloriesController,
+                    descriptionController: breakfastDescriptionController,
+                    onSave: () {
+                      print('Breakfast saved');
+                      // Handle save logic here (e.g., save data to a database)
+                    },
+                  ),
+                ),
+                SizedBox(width: 16), // Space between the two boxes
+                Expanded(
+                  child: MealCategoryBox(
+                    title: 'Lunch:',
+                    caloriesController: lunchCaloriesController,
+                    descriptionController: lunchDescriptionController,
+                    onSave: () {
+                      print('Lunch saved');
+                      // Handle save logic here (e.g., save data to a database)
+                    },
+                  ),
+                ),
+                SizedBox(width: 16), // Space between the two boxes
+                Expanded(
+                  child: MealCategoryBox(
+                    title: 'Dinner:',
+                    caloriesController: dinnerCaloriesController,
+                    descriptionController: dinnerDescriptionController,
+                    onSave: () {
+                      print('Dinner saved');
+                      // Handle save logic here (e.g., save data to a database)
+                    },
+                  ),
+                ),
+                SizedBox(width: 16), // Space between the two boxes
+                Expanded(
+                  child: MealCategoryBox(
+                    title: 'Snack:',
+                    caloriesController: snackCaloriesController,
+                    descriptionController: snackDescriptionController,
+                    onSave: () {
+                      print('Snack saved');
+                      // Handle save logic here (e.g., save data to a database)
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          
+        ],
+      ),
+    );
+  }
+}
+
+class MealCategoryBox extends StatelessWidget {
+  final String title;
+  final TextEditingController caloriesController;
+  final TextEditingController descriptionController;
+  final VoidCallback onSave;
+
+  MealCategoryBox({
+    required this.title,
+    required this.caloriesController,
+    required this.descriptionController,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blueAccent, width: 2), // Blue outline
+        borderRadius: BorderRadius.circular(8), // Rounded corners
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8), // Space between title and input fields
+
+          // Calorie Input Field
+          TextField(
+            controller: caloriesController,
+            decoration: InputDecoration(
+              labelText: 'Calories',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          SizedBox(height: 8), // Space between calorie and description input fields
+
+          // Description Input Field
+          TextField(
+            controller: descriptionController,
+            decoration: InputDecoration(
+              labelText: 'Description',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 2, // Multi-line input for description
+          ),
+          SizedBox(height: 16), // Space for the button
+
+          // Save Button
+          ElevatedButton(
+            onPressed: onSave, // Call the provided onSave function when the button is pressed
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+/*
+
+Expanded(child: Container()),
+
+
+StatefulWidget {
+  const PageSix({super.key});
+
+  @override
+  _PageSixState createState() => _PageSixState();
+}
+
+class _PageSixState extends State<PageSix> {
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  double _calories = 0.0;
+  String dropdownvalue = 'Breakfast';
+  final TextEditingController breakfastCaloriesController =
+      TextEditingController();
+  final TextEditingController lunchCaloriesController = TextEditingController();
+  final TextEditingController dinnerCaloriesController =
+      TextEditingController();
+  final TextEditingController snackCaloriesController = TextEditingController();
+  final TextEditingController breakfastDescriptionController =
+      TextEditingController();
+  final TextEditingController lunchDescriptionController =
+      TextEditingController();
+  final TextEditingController dinnerDescriptionController =
+      TextEditingController();
+  final TextEditingController snackDescriptionController =
+      TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calorie Tracker Home'),
+      ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 132, // Adjust the height as needed
+            child: TableCalendar(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              calendarFormat: _calendarFormat,
+              availableCalendarFormats: const {
+                CalendarFormat.week: 'Week'
+              }, // Only week view
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay; // update _focusedDay here as well
+                });
+              },
+              onPageChanged: (focusedDay) {
+                _focusedDay = focusedDay;
+              },
+              calendarStyle: const CalendarStyle(
+                selectedDecoration: BoxDecoration(
+                  color: Colors.green, // Color the selected day green
+                  shape: BoxShape.circle,
+                ),
+                todayDecoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false, // Hide the format button
+                titleCentered: true,
+                titleTextStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const Divider(
+            thickness: 2, // Adjust the thickness as needed
+            color: Colors.grey, // Adjust the color as needed
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: _calories / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${_calories.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Total'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: _calories / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${_calories.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Breakfast'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: _calories / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${_calories.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Lunch'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: _calories / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${_calories.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Dinner'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Flexible(
+                      child: CircularPercentIndicator(
+                        radius: 50.0,
+                        lineWidth: 5.0,
+                        percent: _calories / 2000.0,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${_calories.toStringAsFixed(0)} cal',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Text('Snack'),
+                          ],
+                        ),
+                        progressColor: Colors.green,
+                        backgroundColor: Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                ),          
+              ],
+            ),
+          ),
+          const Divider(
+            thickness: 2, // Adjust the thickness as needed
+            color: Colors.grey, // Adjust the color as needed
+          ),  
+          
+          
+
+           Flexible(
+                  child: ListView(
+                    children: <Widget>[
+                      _buildMealCategory(' Breakfast:', breakfastCaloriesController,
+                          breakfastDescriptionController),
+                      _buildDivider(),
+                      _buildMealCategory(' Lunch:', lunchCaloriesController,
+                          lunchDescriptionController),
+                      _buildDivider(),
+                      _buildMealCategory(' Dinner:', dinnerCaloriesController,
+                          dinnerDescriptionController),
+                      _buildDivider(),
+                      _buildMealCategory(' Snack:', snackCaloriesController,
+                          snackDescriptionController),
+                    ],
+                  ),
+                ),
+
+                
+        ],
+      ),
+    );
+  }
+  
+  
+  Widget _buildMealCategory(
+      String title,
+      TextEditingController caloriesController,
+      TextEditingController descriptionController) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      
+      children: <Widget>[
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: caloriesController,
+          decoration: InputDecoration(
+            labelText: 'Calories Used (Placeholder)',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: descriptionController,
+          decoration: InputDecoration(
+            labelText: 'Description',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 4,
+        ),
+        SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      color: Colors.grey,
+      thickness: 1,
+    );
+  }
+}*/
