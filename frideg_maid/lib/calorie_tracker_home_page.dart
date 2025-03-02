@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'other_pages.dart'; // Ensure this import is correct
-// Ensure this import is correct
+import 'account_info_page.dart'; // Ensure this import is correct
 
 class CalorieTrackerHome extends StatefulWidget {
   const CalorieTrackerHome({super.key});
@@ -32,6 +32,24 @@ class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true, // Center the title
+        title: const Text('Fridge Maid'), // Set the title to "Fridge Maid"
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle), // Profile icon
+            onPressed: () {
+              // Navigate to the AccountInfoPage when clicked
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AccountInfoPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
      
       body: _pages[_selectedIndex], // Display the selected page
       bottomNavigationBar: BottomNavigationBar(

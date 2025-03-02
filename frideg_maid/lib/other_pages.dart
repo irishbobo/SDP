@@ -112,168 +112,177 @@ class _PageTwoState extends State<PageTwo> {
   String dropdownvalue = 'Breakfast';
 
   void _addCalories() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      TextEditingController calorieController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController calorieController = TextEditingController();
 
-      return Dialog(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Adjust width based on screen width
-            double dialogWidth = constraints.maxWidth * 0.4; // 80% of screen width
-            double dialogHeight = constraints.maxHeight * 0.65; // 80% of screen height
+        return Dialog(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Adjust width based on screen width
+              double dialogWidth =
+                  constraints.maxWidth * 0.4; // % of screen width
+              double dialogHeight =
+                  constraints.maxHeight * 0.65; // % of screen height
 
-            return Container(
-              width: dialogWidth,
-              height: dialogHeight,
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  const Text(
-                    'Add Calories',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              return Container(
+                width: dialogWidth,
+                height: dialogHeight,
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    const Text(
+                      'Add Calories',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                  // Calorie input field
-                  TextField(
-                    controller: calorieController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter calories',
-                      border: OutlineInputBorder(),
+                    // Calorie input field
+                    TextField(
+                      controller: calorieController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter calories',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                  // Dropdown for calorie preferences (Daily or Weekly)
-                  DropdownButtonFormField<String>(
-                    items: <String>['Daily Calorie View', 'Weekly Calorie View']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    hint: const Text('Enter Max Calories Preferences (Daily or weekly)'),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        dropdownvalue = newValue!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    // Dropdown for calorie preferences (Daily or Weekly)
+                    DropdownButtonFormField<String>(
+                      items: <String>[
+                        'Daily Calorie View',
+                        'Weekly Calorie View'
+                      ].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      hint: const Text(
+                          'Enter Max Calories Preferences (Daily or weekly)'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          dropdownvalue = newValue!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
 
-                  // Dropdown for meal selection
-                  DropdownButtonFormField<String>(
-                    items: <String>['Breakfast', 'Lunch', 'Dinner', 'Snack']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    hint: const Text('Enter Meal'),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        dropdownvalue = newValue!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 10),
+                    // Dropdown for meal selection
+                    DropdownButtonFormField<String>(
+                      items: <String>['Breakfast', 'Lunch', 'Dinner', 'Snack']
+                          .map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      hint: const Text('Enter Meal'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          dropdownvalue = newValue!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 10),
 
-                  // Buttons for navigation (to different pages)
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: const Row(
-                          children: [
-                            Icon(Icons.list),
-                            Text(" Calorie Tracker Homepage"),
-                          ],
+                    // Buttons for navigation (to different pages)
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Row(
+                            children: [
+                              Icon(Icons.list),
+                              Text(" Calorie Tracker Homepage"),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Close the current dialog or screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CalorieTrackerHome(),
+                              ),
+                            );
+                          },
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CalorieTrackerHome(),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: const Row(
-                          children: [
-                            Icon(Icons.list),
-                            Text(" Calorie Calculator"),
-                          ],
+                        IconButton(
+                          icon: const Row(
+                            children: [
+                              Icon(Icons.list),
+                              Text(" Calorie Calculator"),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CalorieCalculator(),
+                              ),
+                            );
+                          },
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CalorieCalculator(),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: const Row(
-                          children: [
-                            Icon(Icons.list),
-                            Text(" BMI Calculator"),
-                          ],
+                        IconButton(
+                          icon: const Row(
+                            children: [
+                              Icon(Icons.list),
+                              Text(" BMI Calculator"),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BMICalculator(),
+                              ),
+                            );
+                          },
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BMICalculator(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
 
-                  // Cancel and Add buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _calories += double.tryParse(calorieController.text) ?? 0.0;
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Add'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      );
-    },
-  );
-}
-
+                    // Cancel and Add buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _calories +=
+                                  double.tryParse(calorieController.text) ??
+                                      0.0;
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Add'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -283,6 +292,10 @@ class _PageTwoState extends State<PageTwo> {
       ),
       body: Column(
         children: [
+          const Divider(
+            thickness: 2, // Adjust the thickness as needed
+            color: Colors.grey, // Adjust the color as needed
+          ),
           SizedBox(
             height: 132, // Adjust the height as needed
             child: TableCalendar(
@@ -499,7 +512,6 @@ class _PageFiveState extends State<PageFive> {
 
 // Page 6 Calorie Tracker Home
 
-
 class PageSix extends StatefulWidget {
   const PageSix({super.key});
 
@@ -518,8 +530,7 @@ class _PageSixState extends State<PageSix> {
   final TextEditingController lunchCaloriesController = TextEditingController();
   final TextEditingController dinnerCaloriesController =
       TextEditingController();
-  final TextEditingController snackCaloriesController =
-      TextEditingController();
+  final TextEditingController snackCaloriesController = TextEditingController();
   final TextEditingController breakfastDescriptionController =
       TextEditingController();
   final TextEditingController lunchDescriptionController =
@@ -533,10 +544,68 @@ class _PageSixState extends State<PageSix> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calorie Tracker Home'),
-      ),
+          title: const Text('Calorie Tracker Home'),
+          centerTitle: true, // Centers the title
+          actions: [
+            IconButton(
+              // ignore: prefer_const_constructors
+              icon: Row(
+                mainAxisSize: MainAxisSize
+                    .min, // Ensures the row doesn't take up all available space
+                children: const [
+                  Icon(Icons.calculate), // Profile icon
+                  SizedBox(
+                      width:
+                          8), // Adds a little spacing between the icon and the text
+                  Text(
+                    "Calorie Calculator", // Your text here
+                    style: TextStyle(fontSize: 14), // Small text style
+                  ),
+                ],
+              ),
+              onPressed: () {
+                // Navigate to the CalorieCalculator page when clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CalorieCalculator(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              // ignore: prefer_const_constructors
+              icon: Row(
+                mainAxisSize: MainAxisSize
+                    .min, // Ensures the row doesn't take up all available space
+                children: const [
+                  Icon(Icons.calculate), // Profile icon
+                  SizedBox(
+                      width:
+                          8), // Adds a little spacing between the icon and the text
+                  Text(
+                    "BMI Calculator", // Your text here
+                    style: TextStyle(fontSize: 14), // Small text style
+                  ),
+                ],
+              ),
+              onPressed: () {
+                // Navigate to the CalorieCalculator page when clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BMICalculator(),
+                  ),
+                );
+              },
+            ),
+          ]),
       body: Column(
         children: [
+          const Divider(
+            thickness: 2, // Adjust the thickness as needed
+            color: Colors.grey, // Adjust the color as needed
+          ),
           SizedBox(
             height: 132, // Adjust the height as needed
             child: TableCalendar(
@@ -588,7 +657,6 @@ class _PageSixState extends State<PageSix> {
           Expanded(
             child: Row(
               children: [
-                
                 Expanded(
                   child: GestureDetector(
                     child: Flexible(
@@ -676,7 +744,7 @@ class _PageSixState extends State<PageSix> {
                               style: const TextStyle(fontSize: 18),
                             ),
                             Text(
-                              '${(450/ 2000.0 * 100).toStringAsFixed(1)}%',
+                              '${(450 / 2000.0 * 100).toStringAsFixed(1)}%',
                               style: const TextStyle(fontSize: 16),
                             ),
                             const Text('Lunch'),
@@ -741,7 +809,7 @@ class _PageSixState extends State<PageSix> {
                       ),
                     ),
                   ),
-                ),          
+                ),
               ],
             ),
           ), // Placeholder for other content
@@ -753,13 +821,14 @@ class _PageSixState extends State<PageSix> {
 
           // The Row containing the four boxes at the bottom of the screen
           Padding(
-            padding: const EdgeInsets.all(16.0), // Add padding to create space around the boxes
+            padding: const EdgeInsets.all(
+                8.0), // Add padding to create space around the boxes
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Breakfast:' + '  (350 Calories today...)',
+                    title: ' Breakfast:' + '  (350 Calories today...)',
                     caloriesController: breakfastCaloriesController,
                     descriptionController: breakfastDescriptionController,
                     onSave: () {
@@ -771,7 +840,7 @@ class _PageSixState extends State<PageSix> {
                 SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Lunch:' + '  (450 Calories today...)',
+                    title: ' Lunch:' + '  (450 Calories today...)',
                     caloriesController: lunchCaloriesController,
                     descriptionController: lunchDescriptionController,
                     onSave: () {
@@ -783,7 +852,7 @@ class _PageSixState extends State<PageSix> {
                 SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Dinner:' + '  (850 Calories today...)',
+                    title: ' Dinner:' + '  (850 Calories today...)',
                     caloriesController: dinnerCaloriesController,
                     descriptionController: dinnerDescriptionController,
                     onSave: () {
@@ -795,7 +864,7 @@ class _PageSixState extends State<PageSix> {
                 SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: 'Snack:' + '  (150 Calories today...)',
+                    title: ' Snack:' + '  (150 Calories today...)',
                     caloriesController: snackCaloriesController,
                     descriptionController: snackDescriptionController,
                     onSave: () {
@@ -807,8 +876,6 @@ class _PageSixState extends State<PageSix> {
               ],
             ),
           ),
-
-          
         ],
       ),
     );
@@ -831,7 +898,7 @@ class MealCategoryBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.blueAccent, width: 2), // Blue outline
         borderRadius: BorderRadius.circular(8), // Rounded corners
@@ -847,38 +914,44 @@ class MealCategoryBox extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8), // Space between title and input fields
+          SizedBox(height: 5), // Space between title and input fields
 
-          
           // Calorie Input Field
           TextField(
             controller: caloriesController,
+            // ignore: prefer_const_constructors
             decoration: InputDecoration(
               labelText: 'Add Calories',
               border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
           ),
-          SizedBox(height: 8), // Space between calorie and description input fields
-
+          // ignore: prefer_const_constructors
+          SizedBox(
+              height: 5), // Space between calorie and description input fields
 
           // Description Input Field
           TextField(
             controller: descriptionController,
+            // ignore: prefer_const_constructors
             decoration: InputDecoration(
               labelText: 'Description',
               border: OutlineInputBorder(),
             ),
             maxLines: 2, // Multi-line input for description
           ),
-          SizedBox(height: 16), // Space for the button
-
+          SizedBox(height: 10), // Space for the button
 
           // Save Button
           ElevatedButton(
-            onPressed: onSave, // Call the provided onSave function when the button is pressed
-            child: Text('Save'),
-          ),
+            onPressed: onSave,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0), // You can adjust padding here
+              child: Center(
+                child: Text('Save'),
+              ),
+            ),
+          )
         ],
       ),
     );
