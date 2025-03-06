@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+this is a test
+=======
 kjsdfjkbsdlkjfbalskjdbvfsk
 mnxcmn,mcx,mXznbcm,MXBC.,MzbxC
 intudmkf jkSHDF.KMNAMS, N.D;KS,M DMSDFKN
 x,mnvKSMNvlkjN;cxm nkjcjlkSNDVVKM
+>>>>>>> origin/main

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frideg_maid/calorie_tracker_home_page.dart';
 import 'sign_in_page.dart';
 import 'sign_up_page.dart';
 import 'home_page.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/account': (context) => const AccountInfoPage(),
         '/add_food': (context) => const AddFoodPage(),
         '/add_recipe': (context) => const AddRecipePage(),
+        '/add_calorie': (context) => const CalorieTrackerHome(),
       },
     );
   }

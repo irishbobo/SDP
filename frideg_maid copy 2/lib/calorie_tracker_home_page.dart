@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'other_pages.dart'; // Ensure this import is correct
 import 'account_info_page.dart'; // Ensure this import is correct
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class CalorieTrackerHome extends StatefulWidget {
+  const CalorieTrackerHome({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _CalorieTrackerHomeState createState() => _CalorieTrackerHomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 2;
+class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
+  int _selectedIndex = 5;
 
   // List of pages
   final List<Widget> _pages = [
@@ -19,6 +19,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const PageTwo(), // Home
     const PageThree(), // Schedule
     const PageFour(), // Settings
+    const PageSix(), // Calorie Tracker Home
   ];
 
   // Function to handle tab switch
@@ -49,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+     
       body: _pages[_selectedIndex], // Display the selected page
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -77,6 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fact_check),
+            label: 'Calories',
           ),
         ],
       ),
