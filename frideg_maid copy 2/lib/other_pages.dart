@@ -449,13 +449,13 @@ class _PageTwoState extends State<PageTwo> {
                               '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
                               style: const TextStyle(fontSize: 16),
                             ),
-                            Text(
+                            const Text(
                               'of 2000 cal',
-                              style: const TextStyle(fontSize: 16),
+                              style: TextStyle(fontSize: 16),
                             ),
-                            Text(
+                            const Text(
                               'Total',
-                              style: const TextStyle(fontSize: 22),
+                              style: TextStyle(fontSize: 22),
                             ),
                           ],
                         ),
@@ -901,7 +901,7 @@ class _PageSixState extends State<PageSix> {
               children: [
                 Expanded(
                   child: MealCategoryBox(
-                    title: ' Breakfast:' + '  (350 Calories today...)',
+                    title: ' Breakfast:' '  (350 Calories today...)',
                     caloriesController: breakfastCaloriesController,
                     descriptionController: breakfastDescriptionController,
                     onSave: () {
@@ -910,10 +910,10 @@ class _PageSixState extends State<PageSix> {
                     },
                   ),
                 ),
-                SizedBox(width: 16), // Space between the two boxes
+                const SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: ' Lunch:' + '  (450 Calories today...)',
+                    title: ' Lunch:' '  (450 Calories today...)',
                     caloriesController: lunchCaloriesController,
                     descriptionController: lunchDescriptionController,
                     onSave: () {
@@ -922,10 +922,10 @@ class _PageSixState extends State<PageSix> {
                     },
                   ),
                 ),
-                SizedBox(width: 16), // Space between the two boxes
+                const SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: ' Dinner:' + '  (850 Calories today...)',
+                    title: ' Dinner:' '  (850 Calories today...)',
                     caloriesController: dinnerCaloriesController,
                     descriptionController: dinnerDescriptionController,
                     onSave: () {
@@ -934,10 +934,10 @@ class _PageSixState extends State<PageSix> {
                     },
                   ),
                 ),
-                SizedBox(width: 16), // Space between the two boxes
+                const SizedBox(width: 16), // Space between the two boxes
                 Expanded(
                   child: MealCategoryBox(
-                    title: ' Snack:' + '  (150 Calories today...)',
+                    title: ' Snack:' '  (150 Calories today...)',
                     caloriesController: snackCaloriesController,
                     descriptionController: snackDescriptionController,
                     onSave: () {
@@ -961,7 +961,7 @@ class MealCategoryBox extends StatelessWidget {
   final TextEditingController descriptionController;
   final VoidCallback onSave;
 
-  MealCategoryBox({
+  const MealCategoryBox({super.key, 
     required this.title,
     required this.caloriesController,
     required this.descriptionController,
@@ -971,7 +971,7 @@ class MealCategoryBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.blueAccent, width: 2), // Blue outline
         borderRadius: BorderRadius.circular(8), // Rounded corners
@@ -982,12 +982,12 @@ class MealCategoryBox extends StatelessWidget {
           // Title
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 5), // Space between title and input fields
+          const SizedBox(height: 5), // Space between title and input fields
 
           // Calorie Input Field
           TextField(
@@ -995,7 +995,7 @@ class MealCategoryBox extends StatelessWidget {
             // ignore: prefer_const_constructors
             decoration: InputDecoration(
               labelText: 'Add Calories',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
           ),
@@ -1009,17 +1009,17 @@ class MealCategoryBox extends StatelessWidget {
             // ignore: prefer_const_constructors
             decoration: InputDecoration(
               labelText: 'Description',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
             maxLines: 2, // Multi-line input for description
           ),
-          SizedBox(height: 10), // Space for the button
+          const SizedBox(height: 10), // Space for the button
 
           // Save Button
           ElevatedButton(
             onPressed: onSave,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0), // You can adjust padding here
+            child: const Padding(
+              padding: EdgeInsets.all(8.0), // You can adjust padding here
               child: Center(
                 child: Text('Save'),
               ),

@@ -5,6 +5,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
 }
 
 class BMICalculator extends StatefulWidget {
+  const BMICalculator({super.key});
+
   @override
   _BMICalculatorState createState() => _BMICalculatorState();
 }
@@ -63,7 +67,7 @@ class _BMICalculatorState extends State<BMICalculator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('BMI Calculator'),
+        title: const Text('BMI Calculator'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -73,7 +77,7 @@ class _BMICalculatorState extends State<BMICalculator> {
             children: <Widget>[
               TextFormField(
                 controller: weightController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Weight (lbs)',
                   border: OutlineInputBorder(),
                 ),
@@ -85,13 +89,13 @@ class _BMICalculatorState extends State<BMICalculator> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 children: <Widget>[
                   Expanded(
                     child: TextFormField(
                       controller: feetController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Height (feet)',
                         border: OutlineInputBorder(),
                       ),
@@ -104,11 +108,11 @@ class _BMICalculatorState extends State<BMICalculator> {
                       },
                     ),
                   ),
-                  SizedBox(width: 16.0),
+                  const SizedBox(width: 16.0),
                   Expanded(
                     child: TextFormField(
                       controller: inchesController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Height (inches)',
                         border: OutlineInputBorder(),
                       ),
@@ -123,27 +127,27 @@ class _BMICalculatorState extends State<BMICalculator> {
                   ),
                 ],
               ),
-              SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
                     calculateBMI();
                   }
                 },
-                child: Text('Calculate BMI'),
+                child: const Text('Calculate BMI'),
               ),
-              SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
               if (_bmi > 0)
                 Column(
                   children: [
                     Text(
                       'Your BMI: ${_bmi.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 16.0),
+                    const SizedBox(height: 16.0),
                     Text(
                       'Category: $_bmiCategory',
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
                   ],
                 ),

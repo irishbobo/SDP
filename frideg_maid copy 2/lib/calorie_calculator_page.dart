@@ -5,6 +5,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
 }
 
 class CalorieCalculator extends StatefulWidget {
+  const CalorieCalculator({super.key});
+
   @override
   _CalorieCalculatorState createState() => _CalorieCalculatorState();
 }
@@ -85,7 +89,7 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calorie Calculator'),
+        title: const Text('Calorie Calculator'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -95,7 +99,7 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
             children: <Widget>[
               TextFormField(
                 controller: weightController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Weight (lbs)',
                   border: OutlineInputBorder(),
                 ),
@@ -107,13 +111,13 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 children: <Widget>[
                   Expanded(
                     child: TextFormField(
                       controller: feetController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Height (feet)',
                         border: OutlineInputBorder(),
                       ),
@@ -126,11 +130,11 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
                       },
                     ),
                   ),
-                  SizedBox(width: 16.0),
+                  const SizedBox(width: 16.0),
                   Expanded(
                     child: TextFormField(
                       controller: inchesController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Height (inches)',
                         border: OutlineInputBorder(),
                       ),
@@ -145,10 +149,10 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: ageController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Age',
                   border: OutlineInputBorder(),
                 ),
@@ -160,7 +164,7 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               DropdownButtonFormField<String>(
                 value: _gender,
                 onChanged: (value) {
@@ -168,7 +172,7 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
                     _gender = value!;
                   });
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Gender',
                   border: OutlineInputBorder(),
                 ),
@@ -179,42 +183,42 @@ class _CalorieCalculatorState extends State<CalorieCalculator> {
                   );
                 }).toList(),
               ),
-              SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
                     calculateBMR();
                   }
                 },
-                child: Text('Calculate BMR and Calories'),
+                child: const Text('Calculate BMR and Calories'),
               ),
-              SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
               if (_bmr > 0)
                 Column(
                   children: [
                     Text(
                       'Your BMR: ${_bmr.toStringAsFixed(2)} kcal/day',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 16.0),
+                    const SizedBox(height: 16.0),
                     Text(
                       'Calories needed to Maintain weight: ${_caloriesMaintain.toStringAsFixed(2)} kcal/day',
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
-                    SizedBox(height: 16.0),
+                    const SizedBox(height: 16.0),
                     Text(
                       'Calories for Mild weight loss (0.5 lb/week): ${_caloriesMildLoss.toStringAsFixed(2)} kcal/day',
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
-                    SizedBox(height: 16.0),
+                    const SizedBox(height: 16.0),
                     Text(
                       'Calories for Steady weight loss (1 lb/week): ${_caloriesSteadyLoss.toStringAsFixed(2)} kcal/day',
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
-                    SizedBox(height: 16.0),
+                    const SizedBox(height: 16.0),
                     Text(
                       'Calories for Extreme weight loss (2 lb/week): ${_caloriesExtremeLoss.toStringAsFixed(2)} kcal/day',
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
                   ],
                 ),
