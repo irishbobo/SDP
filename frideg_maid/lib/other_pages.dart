@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frideg_maid/add_pantry_page.dart';
 import 'package:frideg_maid/calorie_calculator_page.dart';
 import 'package:frideg_maid/calorie_tracker_home_page.dart';
 import 'add_food_page.dart'; // Import the AddFoodPage
@@ -20,6 +21,8 @@ class PageOne extends StatefulWidget {
 class _PageOneState extends State<PageOne> {
   // List to hold food items
   final List<Map<String, dynamic>> _foodItems = [];
+  final List<Map<String, dynamic>> _pantryItems = [];
+  final double cardHeight = 30.0;
 
   // Add Food button logic to navigate to AddFoodPage
   void _addFood() async {
@@ -32,6 +35,20 @@ class _PageOneState extends State<PageOne> {
     if (newFood != null) {
       setState(() {
         _foodItems.add(newFood);
+      });
+    }
+  }
+  // Add Pantry button logic to navigate to AddPantryPage
+  void _addPantry() async {
+    final Map<String, dynamic>? newPantry = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddPantryPage()),
+    );
+
+    // If data is not null, add it to the food items list
+    if (newPantry != null) {
+      setState(() {
+        _pantryItems.add(newPantry);
       });
     }
   }
@@ -50,13 +67,65 @@ class _PageOneState extends State<PageOne> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Fridge'),
-      ),
+          title: const Text('Your Fridge'),
+          centerTitle: true, // Centers the title
+          actions: [
+            IconButton(
+              // ignore: prefer_const_constructors
+              icon: Row(
+                mainAxisSize: MainAxisSize
+                    .min, // Ensures the row doesn't take up all available space
+                children: const [
+                  Icon(Icons.add_box), // Profile icon
+                  SizedBox(
+                      width:
+                          8), // Adds a little spacing between the icon and the text
+                  Text(
+                    "Add Pantry", // Your text here
+                    style: TextStyle(fontSize: 14), // Small text style
+                  ),
+                ],
+              ),
+              onPressed: _addPantry,
+        
+            ),
+            IconButton(
+              // ignore: prefer_const_constructors
+              icon: Row(
+                mainAxisSize: MainAxisSize
+                    .min, // Ensures the row doesn't take up all available space
+                children: const [
+                  Icon(Icons.kitchen), // Profile icon
+                  SizedBox(
+                      width:
+                          8), // Adds a little spacing between the icon and the text
+                  Text(
+                    "Add Fridge", // Your text here
+                    style: TextStyle(fontSize: 14), // Small text style
+                  ),
+                ],
+              ),
+              onPressed: () {
+                // Navigate to the ----- page when clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BMICalculator(),
+                  ),
+                );
+                const Divider(
+                  thickness: 2, // Adjust the thickness as needed
+                  color: Colors.grey, // Adjust the color as needed
+                );
+              },
+            ),
+          ]),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // 2 columns in the grid
-          crossAxisSpacing: 10.0, // Spacing between columns
-          mainAxisSpacing: 10.0, // Spacing between rows
+          mainAxisExtent: 100,
+          crossAxisSpacing: 8.0, // Spacing between columns
+          mainAxisSpacing: 8.0, // Spacing between rows
         ),
         itemCount: _foodItems.length,
         itemBuilder: (context, index) {
@@ -64,8 +133,12 @@ class _PageOneState extends State<PageOne> {
           return GestureDetector(
             onTap: () => _viewFoodDetail(food),
             child: Card(
-              elevation: 5.0,
-              child: Padding(
+              elevation: 8.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Container(
+                height: cardHeight, // Control the height here
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -78,7 +151,7 @@ class _PageOneState extends State<PageOne> {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text('Quantity: ${food['quantity']?.toString() ?? 'N/A'}'),
                     Text('Calories: ${food['calories']?.toString() ?? 'N/A'}'),
                   ],
@@ -89,7 +162,7 @@ class _PageOneState extends State<PageOne> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addFood,
+        onPressed: _addPantry,
         child: const Icon(Icons.add),
       ),
     );
