@@ -1,1 +1,0 @@
- /Users/Zeina/Desktop/SDP/frideg_maid/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart /Users/Zeina/Desktop/SDP/frideg_maid/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart:  /Users/Zeina/Desktop/SDP/frideg_maid/l10n.yaml /Users/Zeina/Desktop/SDP/frideg_maid/lib/src/localization/app_en.arb
