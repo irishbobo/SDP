@@ -38,6 +38,7 @@ class _PageOneState extends State<PageOne> {
       });
     }
   }
+
   // Add Pantry button logic to navigate to AddPantryPage
   void _addPantry() async {
     final Map<String, dynamic>? newPantry = await Navigator.push(
@@ -70,7 +71,7 @@ class _PageOneState extends State<PageOne> {
           title: const Text('Your Fridge'),
           centerTitle: true, // Centers the title
           actions: [
-            IconButton(
+            /*IconButton(
               // ignore: prefer_const_constructors
               icon: Row(
                 mainAxisSize: MainAxisSize
@@ -118,7 +119,7 @@ class _PageOneState extends State<PageOne> {
                   color: Colors.grey, // Adjust the color as needed
                 );
               },
-            ),
+            ),*/
           ]),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -162,7 +163,7 @@ class _PageOneState extends State<PageOne> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addPantry,
+        onPressed: _addFood,
         child: const Icon(Icons.add),
       ),
     );
@@ -183,6 +184,40 @@ class _PageTwoState extends State<PageTwo> {
   DateTime? _selectedDay;
   double _calories = 0.0;
   String dropdownvalue = 'Breakfast';
+  List<Map<String, String>> meals = [
+    {
+      "name": "Spaghetti Bolognese",
+      "image":
+          "https://www.cookingwithnanaling.com/wp-content/uploads/2021/09/spaghetti-bolognese-sq.jpg"
+    },
+    {
+      "name": "Grilled Chicken Salad",
+      "image":
+          "https://www.eatingbirdfood.com/wp-content/uploads/2023/06/grilled-chicken-salad-hero.jpg"
+    },
+    {
+      "name": "Beef Tacos",
+      "image":
+          "https://kaynutrition.com/wp-content/uploads/2023/08/shredded-beef-tacos.jpg"
+    },
+    {
+      "name": "Vegetable Stir Fry",
+      "image":
+          "https://www.cookingclassy.com/wp-content/uploads/2019/12/chicken-stir-fry-1.jpg"
+    },
+    {
+      "name": "Pizza Margherita",
+      "image":
+          "https://kitchenswagger.com/wp-content/uploads/2023/05/margherita-pizza-close.jpg"
+    },
+    {
+      "name": "Sushi Platter",
+      "image":
+          "https://properfoodie.com/wp-content/uploads/2020/07/sushi-1-1.jpg"
+    },
+  ];
+  double cardHeight =
+      175; // Example fixed height for each card, you can adjust this
 
   void _addCalories() {
     showDialog(
@@ -418,12 +453,60 @@ class _PageTwoState extends State<PageTwo> {
           Expanded(
             child: Row(
               children: [
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'Recommended Meals',
-                      style: TextStyle(fontSize: 24),
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Number of columns in the grid
+                      crossAxisSpacing: 8.0, // Horizontal spacing between items
+                      mainAxisSpacing: 8.0, // Vertical spacing between items
+                      childAspectRatio:
+                          0.80, // Aspect ratio of each card (height/width)
                     ),
+                    itemCount: meals.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Container(
+                          height:
+                              cardHeight, // Control the overall height of the card
+                          child: Column(
+                            children: [
+                              // Image section (Network Image)
+                              ClipRRect(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(10)),
+                                child: Image.network(
+                                  meals[index]["image"]!,
+                                  height: cardHeight *
+                                      0.7, // Image takes up 70% of card height
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              // Meal name section
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  meals[index]["name"]!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                
+                              ),
+                              const Text('Recommended For You', style: TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const VerticalDivider(
