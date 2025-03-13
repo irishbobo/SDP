@@ -499,7 +499,6 @@ class _PageTwoState extends State<PageTwo> {
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                
                               ),
                               const Text('Recommended For You', style: TextStyle(fontSize: 14)),
                             ],
