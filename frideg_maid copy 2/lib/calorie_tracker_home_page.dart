@@ -33,8 +33,23 @@ class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true, // Center the title
-        title: const Text('Fridge Maid'), // Set the title to "Fridge Maid"
+        title: Row(
+          mainAxisSize: MainAxisSize
+              .min, // To ensure the row takes only as much space as needed
+          children: [
+            Image.asset(
+              'assets/images/Fridge_Maid_Logo.gif', // Replace with your logo path
+              height: 35.0, // Size the logo to match the icon size
+            ),
+            const SizedBox(width: 8), // Add some space between the logo and the title
+            const Text(
+              'Fridge Maid', // Set the title to "Fridge Maid"
+              style: TextStyle(
+                fontWeight: FontWeight.bold, // Make the title bold
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle), // Profile icon
