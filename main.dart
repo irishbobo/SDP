@@ -1,66 +1,120 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, library_private_types_in_public_api, avoid_print
-
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
 }
 
-///boop
 ///
-/// Root widget of the app, setting up routes and the initial home.
+/// The root widget of the application.
+/// Sets up our MaterialApp, theme, and named routes for navigation.
 ///
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Registration Flow',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      // We define named routes so it's easy to navigate between pages.
+      title: 'Bottom AppBar Hamburger',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       routes: {
-        LoginPage.routeName: (context) => LoginPage(),
-        SignUpPage.routeName: (context) => SignUpPage(),
+        ProfilePage.routeName: (context) => ProfilePage(),
+        DietSettingsPage.routeName: (context) => DietSettingsPage(),
+        SavedRecipesPage.routeName: (context) => SavedRecipesPage(),
+        MyMacrosPage.routeName: (context) => MyMacrosPage(),
       },
-      home: HomeScreen(),
+      home: HomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 ///
-/// The HomeScreen displays two large buttons:
-/// 1) "Log In"
-/// 2) "Sign Up"
-/// Tapping these buttons navigates to the respective pages.
+/// HomePage widget:
+/// - No top AppBar at all.
+/// - Uses a BottomAppBar with a hamburger icon on the right side.
+/// - Uses endDrawer to open from the right side of the screen.
 ///
-class HomeScreen extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // A GlobalKey to access the ScaffoldState so we can open the endDrawer programmatically.
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Simple top app bar with a title.
-      appBar: AppBar(
-        title: Text('User Registration Demo'),
-      ),
+      // Connect the Scaffold to our global key, allowing control over the drawer.
+      key: _scaffoldKey,
+
+      // We won't have a top AppBar, so just place the main content in the body.
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Text(
+          'Home page bullshit',
+          textAlign: TextAlign.center,
+        ),
+      ),
+
+      // Use an endDrawer that slides in from the right side.
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            // "Log In" button.
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, LoginPage.routeName);
-              },
-              child: Text('Log In'),
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 150, 216, 74),
+              ),
+              child: Text(
+                'MENU',
+                style: TextStyle(color: Colors.black, fontSize: 24),
+              ),
             ),
-            SizedBox(height: 16),
-            // "Sign Up" button.
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, SignUpPage.routeName);
+            ListTile(
+              title: Text('PROFILE'),
+              onTap: () {
+                Navigator.pushNamed(context, ProfilePage.routeName);
               },
-              child: Text('Sign Up'),
+            ),
+            ListTile(
+              title: Text('DIET SETTINGS'),
+              onTap: () {
+                Navigator.pushNamed(context, DietSettingsPage.routeName);
+              },
+            ),
+            ListTile(
+              title: Text('SAVED RECIPES'),
+              onTap: () {
+                Navigator.pushNamed(context, SavedRecipesPage.routeName);
+              },
+            ),
+            ListTile(
+              title: Text('MY MACROS'),
+              onTap: () {
+                Navigator.pushNamed(context, MyMacrosPage.routeName);
+              },
+            ),
+          ],
+        ),
+      ),
+
+      // BottomAppBar goes at the bottom of the screen.
+      // We place an IconButton (hamburger) on the right to open the endDrawer.
+      bottomNavigationBar: BottomAppBar(
+        // You can shape or style the BottomAppBar if you wish, but here we keep it simple.
+        child: Row(
+          // Push the icon button to the far right.
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                // Programmatically open the end drawer using the Scaffold key.
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
             ),
           ],
         ),
@@ -70,65 +124,64 @@ class HomeScreen extends StatelessWidget {
 }
 
 ///
-/// The actual authentication logic would go in the `handleLogin` method.
+/// PROFILE PAGE
+/// Shows four fields:
+///   1) Profile Name
+///   2) Email
+///   3) Password (obscured)
+///   4) Logout
 ///
-class LoginPage extends StatefulWidget {
-  static const routeName = '/login';
+class ProfilePage extends StatefulWidget {
+  static const routeName = '/profile';
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  // Controllers to capture user input from text fields.
+class _ProfilePageState extends State<ProfilePage> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    // Dispose controllers to free resources.
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  /// Placeholder login logic
-  /// Authentication API or database function here and handle success/failure.
-  void handleLogin() {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    // TODO: Implement actual login logic. For testing:
-    print('Attempting to log in with email: $email, password: $password');
-    // For now, just pop back or show a success message...
-    Navigator.pop(context); // Return to HomeScreen
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Log In'),
-      ),
+      // We can keep a top AppBar on sub-pages if we want.
+      appBar: AppBar(title: Text('Profile')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Email TextField
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Profile Name'),
+            ),
+            SizedBox(height: 20),
             TextField(
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
-            // Password TextField (obscured)
+            SizedBox(height: 20),
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             SizedBox(height: 20),
-            // Log In button
             ElevatedButton(
-              onPressed: handleLogin,
-              child: Text('Log In'),
+              onPressed: () {
+                // Typically you'd also clear the user's session, etc.
+                Navigator.pop(context);
+              },
+              child: Text('Logout'),
             ),
           ],
         ),
@@ -137,186 +190,270 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class SignUpPage extends StatefulWidget {
-  static const routeName = '/signup';
+///
+/// DIET SETTINGS PAGE
+/// Shows a list of excluded foods that the user can add/remove.
+///
+class DietSettingsPage extends StatefulWidget {
+  static const routeName = '/dietSettings';
 
   @override
-  _SignUpPageState createState() => _SignUpPageState();
+  _DietSettingsPageState createState() => _DietSettingsPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
-  // Controllers for the string-based fields:
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _dobController = TextEditingController();
-  final TextEditingController _sexController = TextEditingController();
-  final TextEditingController _fitnessGoalController = TextEditingController();
-
-  // For integer fields:
-  final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _heightController = TextEditingController();
-
-  // For sets, comma-separated strings,
-  // then parse into sets when we "sign up."
-  final TextEditingController _dietaryPreferencesController =
-      TextEditingController();
-  final TextEditingController _allergensController = TextEditingController();
+class _DietSettingsPageState extends State<DietSettingsPage> {
+  final List<String> _excludedFoods = [];
+  final TextEditingController _foodController = TextEditingController();
 
   @override
   void dispose() {
-    // Always dispose controllers.
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneNumberController.dispose();
-    _dobController.dispose();
-    _sexController.dispose();
-    _fitnessGoalController.dispose();
-    _ageController.dispose();
-    _weightController.dispose();
-    _heightController.dispose();
-    _dietaryPreferencesController.dispose();
-    _allergensController.dispose();
+    _foodController.dispose();
     super.dispose();
   }
 
-  /// vvvvvvv  LOOK   AT   ME  vvvvvv !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  /// Placeholder sign-up logic.
-  void handleSignUp() async {
-    final String apiUrl =
-        "https://0l9zfua2q4.execute-api.us-east-1.amazonaws.com/default/CreateUserLambda"; // This is our URL
-    // Collect user input
-    final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
-    final phone = _phoneNumberController.text.trim();
-    final dob = _dobController.text.trim();
-    final sex = _sexController.text.trim();
-    final fitnessGoal = _fitnessGoalController.text.trim();
-
-    final age = int.tryParse(_ageController.text.trim()) ?? 0;
-    final weight = int.tryParse(_weightController.text.trim()) ?? 0;
-    final height = int.tryParse(_heightController.text.trim()) ?? 0;
-
-    final dietaryPreferences = _dietaryPreferencesController.text
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    final allergens = _allergensController.text
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    // Create JSON body
-    final userData = jsonEncode({
-      "name": name,
-      "email": email,
-      "phone_number": phone,
-      "date_of_birth": dob,
-      "age": age,
-      "weight": weight,
-      "height": height,
-      "sex": sex,
-      "fitness_goal": fitnessGoal,
-      "dietary_preferences": dietaryPreferences,
-      "allergens": allergens
-    });
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: userData,
-      );
-
-      if (response.statusCode == 200) {
-        print("User Registered: ${jsonDecode(response.body)}");
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Registration Successful!")));
-      } else {
-        print("Error: ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Registration Failed! ${response.body}")));
-      }
-    } catch (e) {
-      print("Request failed: $e");
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Network Error: $e")));
+  void _addFood() {
+    if (_foodController.text.trim().isNotEmpty) {
+      setState(() {
+        _excludedFoods.add(_foodController.text.trim());
+      });
+      _foodController.clear();
     }
+  }
+
+  void _removeFood(int index) {
+    setState(() {
+      _excludedFoods.removeAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign Up'),
+        title: Text('Diet Settings'),
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // String fields
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _phoneNumberController,
-              decoration: InputDecoration(labelText: 'Phone Number'),
-            ),
-            TextField(
-              controller: _dobController,
-              decoration: InputDecoration(labelText: 'Date of Birth'),
-            ),
-            // Int fields
-            TextField(
-              controller: _ageController,
-              decoration: InputDecoration(labelText: 'Age'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _weightController,
-              decoration: InputDecoration(labelText: 'Weight'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _heightController,
-              decoration: InputDecoration(labelText: 'Height'),
-              keyboardType: TextInputType.number,
-            ),
-            // More strings
-            TextField(
-              controller: _sexController,
-              decoration: InputDecoration(labelText: 'Sex'),
-            ),
-            TextField(
-              controller: _fitnessGoalController,
-              decoration: InputDecoration(
-                  labelText: 'Fitness Goal (Lose Weight, Bulk, etc.)'),
-            ),
-            // Sets (comma-separated)
-            TextField(
-              controller: _dietaryPreferencesController,
-              decoration: InputDecoration(
-                  labelText: 'Dietary Preferences (comma-separated)'),
-            ),
-            TextField(
-              controller: _allergensController,
-              decoration:
-                  InputDecoration(labelText: 'Allergens (comma-separated)'),
+            // Field + button to add a new excluded food.
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _foodController,
+                    decoration:
+                        InputDecoration(labelText: 'Add food to exclude'),
+                  ),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _addFood,
+                  child: Text('Add'),
+                ),
+              ],
             ),
             SizedBox(height: 20),
-            // Sign Up button
+            // The list of excluded foods.
+            Expanded(
+              child: ListView.builder(
+                itemCount: _excludedFoods.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_excludedFoods[index]),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () => _removeFood(index),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+///
+/// SAVED RECIPES PAGE
+/// Shows a list of saved recipes that the user can add/remove.
+/// Tapping a recipe opens a dialog for details.
+///
+class SavedRecipesPage extends StatefulWidget {
+  static const routeName = '/savedRecipes';
+
+  @override
+  _SavedRecipesPageState createState() => _SavedRecipesPageState();
+}
+
+class _SavedRecipesPageState extends State<SavedRecipesPage> {
+  final List<String> _recipes = [];
+  final TextEditingController _recipeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _recipeController.dispose();
+    super.dispose();
+  }
+
+  void _addRecipe() {
+    if (_recipeController.text.trim().isNotEmpty) {
+      setState(() {
+        _recipes.add(_recipeController.text.trim());
+      });
+      _recipeController.clear();
+    }
+  }
+
+  void _removeRecipe(int index) {
+    setState(() {
+      _recipes.removeAt(index);
+    });
+  }
+
+  void _openRecipeDetails(String recipeTitle) {
+    TextEditingController detailsController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(recipeTitle),
+          content: TextField(
+            controller: detailsController,
+            decoration: InputDecoration(labelText: 'Recipe Details'),
+            maxLines: 5,
+          ),
+          actions: [
             ElevatedButton(
-              onPressed: handleSignUp,
-              child: Text('Sign Up'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Saved Recipes'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // + button to add new recipes.
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _recipeController,
+                    decoration: InputDecoration(labelText: 'Recipe title'),
+                  ),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _addRecipe,
+                  child: Text('Add'),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            // The list of saved recipes.
+            Expanded(
+              child: ListView.builder(
+                itemCount: _recipes.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_recipes[index]),
+                    onTap: () => _openRecipeDetails(_recipes[index]),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () => _removeRecipe(index),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+///
+/// MY MACROS PAGE
+/// Three integer fields (Calories, Protein, Sugar).
+/// A 'Save' button prints them (in a real app, you'd store them).
+///
+class MyMacrosPage extends StatefulWidget {
+  static const routeName = '/myMacros';
+
+  @override
+  _MyMacrosPageState createState() => _MyMacrosPageState();
+}
+
+class _MyMacrosPageState extends State<MyMacrosPage> {
+  final TextEditingController _caloriesController = TextEditingController();
+  final TextEditingController _proteinController = TextEditingController();
+  final TextEditingController _sugarController = TextEditingController();
+
+  @override
+  void dispose() {
+    _caloriesController.dispose();
+    _proteinController.dispose();
+    _sugarController.dispose();
+    super.dispose();
+  }
+
+  void _saveMacros() {
+    setState(() {
+      // Convert text fields to integers (default to 0 if parsing fails).
+      int calories = int.tryParse(_caloriesController.text) ?? 0;
+      int protein = int.tryParse(_proteinController.text) ?? 0;
+      int sugar = int.tryParse(_sugarController.text) ?? 0;
+
+      // For demo, just print to console. In production, save these somewhere else.
+      print('Calories: $calories, Protein: $protein, Sugar: $sugar');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Macros'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _caloriesController,
+              decoration: InputDecoration(labelText: 'Calories'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: _proteinController,
+              decoration: InputDecoration(labelText: 'Protein'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: _sugarController,
+              decoration: InputDecoration(labelText: 'Sugar'),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _saveMacros,
+              child: Text('Save'),
             ),
           ],
         ),
