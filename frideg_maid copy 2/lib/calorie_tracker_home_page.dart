@@ -39,7 +39,7 @@ class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
           children: [
             Image.asset(
               'assets/images/Fridge_Maid_Logo.gif', // Replace with your logo path
-              height: 35.0, // Size the logo to match the icon size
+              height: 40.0, // Size the logo
             ),
             const SizedBox(width: 8), // Add some space between the logo and the title
             const Text(
