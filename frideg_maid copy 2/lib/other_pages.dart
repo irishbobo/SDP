@@ -9,6 +9,8 @@ import 'recipe_detail_page.dart';
 import 'bmi_calculator_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 // Page One Fridge
 class PageOne extends StatefulWidget {
@@ -875,8 +877,8 @@ class _PageSixState extends State<PageSix> {
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  /*double _calories = 0.0;*/
 
+  // Text editing controllers for calories and descriptions
   final TextEditingController breakfastCaloriesController =
       TextEditingController();
   final TextEditingController lunchCaloriesController = TextEditingController();
@@ -892,12 +894,38 @@ class _PageSixState extends State<PageSix> {
   final TextEditingController snackDescriptionController =
       TextEditingController();
 
+  // Variables to track calories for each meal
+  double _breakfastCalories = 0.0;
+  double _lunchCalories = 0.0;
+  double _dinnerCalories = 0.0;
+  double _snackCalories = 0.0;
+
+  // Calculate total calories for the day
+  double get _totalCalories =>
+      _breakfastCalories + _lunchCalories + _dinnerCalories + _snackCalories;
+
+  // Method to update meal calories and recalculate total
+  void _updateMealCalories(double calories, String mealType) {
+    setState(() {
+      if (mealType == 'Breakfast') {
+        _breakfastCalories = calories;
+      } else if (mealType == 'Lunch') {
+        _lunchCalories = calories;
+      } else if (mealType == 'Dinner') {
+        _dinnerCalories = calories;
+      } else if (mealType == 'Snack') {
+        _snackCalories = calories;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    double totalDailyCalories = 2000.0; // Daily calorie goal
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Calorie Tracker Home'),
-          centerTitle: true, // Centers the title
+        title: const Text('Calorie Tracker Home'),
+        centerTitle: true, // Centers the title
           actions: [
             IconButton(
               // ignore: prefer_const_constructors
@@ -954,27 +982,23 @@ class _PageSixState extends State<PageSix> {
           ]),
       body: Column(
         children: [
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),
+          const Divider(thickness: 2, color: Colors.grey),
+          // Calendar widget
           SizedBox(
-            height: 132, // Adjust the height as needed
+            height: 132,
             child: TableCalendar(
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
               calendarFormat: _calendarFormat,
-              availableCalendarFormats: const {
-                CalendarFormat.week: 'Week'
-              }, // Only week view
+              availableCalendarFormats: const {CalendarFormat.week: 'Week'},
               selectedDayPredicate: (day) {
                 return isSameDay(_selectedDay, day);
               },
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
                   _selectedDay = selectedDay;
-                  _focusedDay = focusedDay; // update `_focusedDay` here as well
+                  _focusedDay = focusedDay;
                 });
               },
               onPageChanged: (focusedDay) {
@@ -982,7 +1006,7 @@ class _PageSixState extends State<PageSix> {
               },
               calendarStyle: const CalendarStyle(
                 selectedDecoration: BoxDecoration(
-                  color: Colors.green, // Color the selected day green
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
@@ -991,71 +1015,84 @@ class _PageSixState extends State<PageSix> {
                 ),
               ),
               headerStyle: const HeaderStyle(
-                formatButtonVisible: false, // Hide the format button
+                formatButtonVisible: false,
                 titleCentered: true,
                 titleTextStyle: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ), // Placeholder for TableCalendar (to be replaced with actual TableCalendar widget)
+            ),
           ),
-          const Divider(
-            thickness: 2,
-            color: Colors.grey,
-          ),
+          const Divider(thickness: 2, color: Colors.grey),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
-                itemCount: 4, // We have 4 categories
+                itemCount: 4,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1, // 2 cards per row
-                  crossAxisSpacing: 16.0, // Space between columns
-                  mainAxisSpacing: 16.0, // Space between rows
-                  childAspectRatio: 1.2, // Adjust height/width ratio of cards
+                  crossAxisCount: 1,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  childAspectRatio: 1.2,
                 ),
                 itemBuilder: (context, index) {
-                  // Map the index to corresponding meal categories
                   switch (index) {
                     case 0:
                       return MealCategoryBox(
-                        title: 'Breakfast: (350 Calories today...)',
+                        title:
+                            'Breakfast: ($_breakfastCalories Calories today...)',
                         caloriesController: breakfastCaloriesController,
                         descriptionController: breakfastDescriptionController,
                         onSave: () {
                           print('Breakfast saved');
                         },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Breakfast');
+                        },
                       );
                     case 1:
                       return MealCategoryBox(
-                        title: 'Lunch: (450 Calories today...)',
+                        title: 'Lunch: ($_lunchCalories Calories today...)',
                         caloriesController: lunchCaloriesController,
                         descriptionController: lunchDescriptionController,
                         onSave: () {
                           print('Lunch saved');
                         },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Lunch');
+                        },
                       );
                     case 2:
                       return MealCategoryBox(
-                        title: 'Dinner: (850 Calories today...)',
+                        title: 'Dinner: ($_dinnerCalories Calories today...)',
                         caloriesController: dinnerCaloriesController,
                         descriptionController: dinnerDescriptionController,
                         onSave: () {
                           print('Dinner saved');
                         },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Dinner');
+                        },
                       );
                     case 3:
                       return MealCategoryBox(
-                        title: 'Snack: (150 Calories today...)',
+                        title: 'Snack: ($_snackCalories Calories today...)',
                         caloriesController: snackCaloriesController,
                         descriptionController: snackDescriptionController,
                         onSave: () {
                           print('Snack saved');
                         },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Snack');
+                        },
                       );
                     default:
-                      return Container(); // Default case
+                      return Container();
                   }
                 },
               ),
@@ -1067,11 +1104,13 @@ class _PageSixState extends State<PageSix> {
   }
 }
 
-class MealCategoryBox extends StatelessWidget {
+class MealCategoryBox extends StatefulWidget {
   final String title;
   final TextEditingController caloriesController;
   final TextEditingController descriptionController;
   final VoidCallback onSave;
+  final double totalCalories;
+  final Function(double) onCaloriesUpdated;
 
   const MealCategoryBox({
     super.key,
@@ -1079,388 +1118,206 @@ class MealCategoryBox extends StatelessWidget {
     required this.caloriesController,
     required this.descriptionController,
     required this.onSave,
+    required this.totalCalories,
+    required this.onCaloriesUpdated,
   });
+
+  @override
+  _MealCategoryBoxState createState() => _MealCategoryBoxState();
+}
+
+class _MealCategoryBoxState extends State<MealCategoryBox> {
+  double _calories = 0.0;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+  bool _hasImage = false;
+
+  void _addCalories() {
+    setState(() {
+      _calories = double.tryParse(widget.caloriesController.text) ?? 0.0;
+      widget.onCaloriesUpdated(_calories);
+    });
+  }
+
+  Future<void> _takePicture() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+        _hasImage = true;
+      });
+    }
+  }
+
+  void _showImagePopup() {
+    if (_image == null) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Meal Picture'),
+          content: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.file(
+              _image!,
+              fit: BoxFit.cover,
+              width: 200,
+              height: 200,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 5, // Adds shadow effect to the card
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10), // Rounded corners
-      ),
-      child: Container(
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
-        height: 150, // Set a fixed height for the card
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center, // Space between widgets
+          mainAxisSize: MainAxisSize.min,
           children: [
+            // Title
             Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              widget.title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
+
+            // Calories Input
             TextField(
-              controller: caloriesController,
+              controller: widget.caloriesController,
               decoration: const InputDecoration(
                 labelText: 'Add Calories',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
+              onChanged: (value) {
+                _addCalories();
+              },
             ),
             const SizedBox(height: 8),
+
+            // Description Input
             TextField(
-              controller: descriptionController,
+              controller: widget.descriptionController,
               decoration: const InputDecoration(
                 labelText: 'Description',
                 border: OutlineInputBorder(),
               ),
-              maxLines: 2, // Multi-line input for description
+              maxLines: 2,
             ),
             const SizedBox(height: 10),
-            Center(
-              // Center the buttons
-              child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Center buttons horizontally
-                children: [
-                  // Save Button
-                  ElevatedButton(
-                    onPressed: onSave,
-                    child: const Text('Save'),
-                  ),
-                  const SizedBox(width: 16), // Add space between buttons
-                  // Cancel Button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle Cancel logic
-                      print('See Chart pressed');
-                    },
-                    child: const Text('See Chart'),
-                  ),
-                ],
-              ),
+
+            // Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: widget.onSave,
+                  child: const Text('Save'),
+                ),
+                ElevatedButton(
+                  onPressed: _hasImage ? _showImagePopup : _takePicture,
+                  child: Text(_hasImage ? 'See Picture' : 'Take Picture'),
+                ),
+                ElevatedButton(
+                  onPressed: _showCaloriesChart,
+                  child: const Text('Show Chart'),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-}
 
+  void _showCaloriesChart() {
+    double dailyGoalCalories = 2000.0;
+    double percentage = (dailyGoalCalories > 0)
+        ? (widget.totalCalories / dailyGoalCalories)
+        : 0.0;
 
-
-
-
-
-
-
-/*
-
-Expanded(child: Container()),
-
-
-StatefulWidget {
-  const PageSix({super.key});
-
-  @override
-  _PageSixState createState() => _PageSixState();
-}
-
-class _PageSixState extends State<PageSix> {
-  final CalendarFormat _calendarFormat = CalendarFormat.week;
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  double _calories = 0.0;
-  String dropdownvalue = 'Breakfast';
-  final TextEditingController breakfastCaloriesController =
-      TextEditingController();
-  final TextEditingController lunchCaloriesController = TextEditingController();
-  final TextEditingController dinnerCaloriesController =
-      TextEditingController();
-  final TextEditingController snackCaloriesController = TextEditingController();
-  final TextEditingController breakfastDescriptionController =
-      TextEditingController();
-  final TextEditingController lunchDescriptionController =
-      TextEditingController();
-  final TextEditingController dinnerDescriptionController =
-      TextEditingController();
-  final TextEditingController snackDescriptionController =
-      TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calorie Tracker Home'),
-      ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 132, // Adjust the height as needed
-            child: TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              calendarFormat: _calendarFormat,
-              availableCalendarFormats: const {
-                CalendarFormat.week: 'Week'
-              }, // Only week view
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay; // update _focusedDay here as well
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              calendarStyle: const CalendarStyle(
-                selectedDecoration: BoxDecoration(
-                  color: Colors.green, // Color the selected day green
-                  shape: BoxShape.circle,
-                ),
-                todayDecoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false, // Hide the format button
-                titleCentered: true,
-                titleTextStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),
-          Expanded(
-            child: Row(
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Calories Chart'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Total'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
+                CircularPercentIndicator(
+                  radius: 120.0,
+                  lineWidth: 12.0,
+                  percent: percentage.clamp(0.0, 1.0),
+                  center: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${widget.totalCalories.toStringAsFixed(0)} cal',
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                       ),
-                    ),
+                      Text(
+                        '${(percentage * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const Text(
+                        'of daily goal',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
                   ),
+                  progressColor: Colors.green,
+                  backgroundColor: Colors.grey[300]!,
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Breakfast'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Meal Description:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Lunch'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
+                Text(
+                  widget.descriptionController.text.isNotEmpty
+                      ? widget.descriptionController.text
+                      : "No description added.",
+                  textAlign: TextAlign.center,
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Dinner'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Snack'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),          
               ],
             ),
           ),
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),  
-          
-          
-
-           Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      _buildMealCategory(' Breakfast:', breakfastCaloriesController,
-                          breakfastDescriptionController),
-                      _buildDivider(),
-                      _buildMealCategory(' Lunch:', lunchCaloriesController,
-                          lunchDescriptionController),
-                      _buildDivider(),
-                      _buildMealCategory(' Dinner:', dinnerCaloriesController,
-                          dinnerDescriptionController),
-                      _buildDivider(),
-                      _buildMealCategory(' Snack:', snackCaloriesController,
-                          snackDescriptionController),
-                    ],
-                  ),
-                ),
-
-                
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
-  
-  
-  Widget _buildMealCategory(
-      String title,
-      TextEditingController caloriesController,
-      TextEditingController descriptionController) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      
-      children: <Widget>[
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        TextField(
-          controller: caloriesController,
-          decoration: InputDecoration(
-            labelText: 'Calories Used (Placeholder)',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-        ),
-        SizedBox(height: 8),
-        TextField(
-          controller: descriptionController,
-          decoration: InputDecoration(
-            labelText: 'Description',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 4,
-        ),
-        SizedBox(height: 16),
-      ],
-    );
-  }
+}
 
-  Widget _buildDivider() {
-    return Divider(
-      color: Colors.grey,
-      thickness: 1,
-    );
-  }
-}*/
+
+
+
+
+
+
+
+
+
+
+
+
