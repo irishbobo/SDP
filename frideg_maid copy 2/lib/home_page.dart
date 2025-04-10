@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'other_pages.dart'; // Ensure this import is correct
 import 'account_info_page.dart'; // Ensure this import is correct
+import 'hidden_menu.dart'; // Import the menu
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -31,7 +32,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return HiddenMenu(
+      child: Scaffold(
       appBar: AppBar(
         centerTitle: true, // Center the title
         title: Row(
@@ -102,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+      )
     );
   }
 }
