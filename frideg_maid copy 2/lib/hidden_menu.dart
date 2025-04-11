@@ -18,6 +18,19 @@ class _HiddenMenuState extends State<HiddenMenu> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 1), () {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Swipe right or hover to access the menu"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    });
+  }
+
   void _showSearchDialog() {
     showDialog(
       context: context,
@@ -108,6 +121,24 @@ class _HiddenMenuState extends State<HiddenMenu> {
               ),
             ),
           ),
+
+          // Small Menu Tab (Visible when menu is hidden)
+          /*Positioned(
+            left: _isMenuVisible ? 200 : 0, // Moves with menu
+            top: MediaQuery.of(context).size.height / 2 - 40,
+            child: GestureDetector(
+              onTap: _toggleMenu,
+              child: Container(
+                width: 30,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade700,
+                  borderRadius: BorderRadius.horizontal(right: Radius.circular(10)),
+                ),
+                child: Icon(Icons.menu, color: Colors.white, size: 30),
+              ),
+            ),
+          ),*/
         ],
       ),
     );

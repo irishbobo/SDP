@@ -11,6 +11,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 // Page One Fridge
 class PageOne extends StatefulWidget {
@@ -561,13 +562,386 @@ class _PageTwoState extends State<PageTwo> {
 }
 
 // Page 3 Schedule
-class PageThree extends StatelessWidget {
+
+class PageThree extends StatefulWidget {
   const PageThree({super.key});
 
   @override
+  _PageThreeState createState() => _PageThreeState();
+}
+
+class _PageThreeState extends State<PageThree> {
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
+  String? _selectedMeal;
+  bool _isUserDefined = false;
+  String? _selectedMealOption;
+  String? _selectedSubMealOption; // Added for the new dropdown
+  String? _mealImageUrl;
+  XFile? _userImage;
+  bool _showDummyMeals = false; // Flag to track past date selection
+
+  final List<String> meals = ["Breakfast", "Lunch", "Dinner", "Snack"];
+  final List<String> mealOptions = [
+    "Saved Recipes",
+    "Recipes Based on Pantry",
+    "Recipes Based on Diet"
+  ];
+
+  final List<Map<String, String>> dummyMeals = [
+    {"title": "BREAKFAST: Oatmeal & Berries", "calories": "250 kcal,",},
+    {"title": "LUNCH: Chicken Salad", "calories": "400 kcal"},
+    {"title": "DINNER: Grilled Fish & Rice", "calories": "550 kcal"},
+    {"title": "SNACK: Yogurt & Nuts", "calories": "200 kcal"},
+  ];
+
+  // Dummy meal UI with Back to Scheduler button
+  Widget _buildDummyMealList() {
+    return Column(
+      children: [
+        const Text(
+          "Meal History for Selected Date",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        ...dummyMeals.map((meal) => Card(
+              child: ListTile(
+                title: Text(meal["title"]!),
+                subtitle: Text("Calories: ${meal["calories"]}"),
+              ),
+            )),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _showDummyMeals = false; // Restore normal mode
+            });
+          },
+          child: const Text("Back to Scheduler"),
+        ),
+      ],
+    );
+  }
+
+  // Function to fetch the options for the subcategory dropdown
+  List<String> getSubMealOptions(String mealOption) {
+    switch (mealOption) {
+      case 'Saved Recipes':
+        return ["Recipe 1", "Recipe 2", "Recipe 3", "Recipe 4", "Recipe 5"];
+      case 'Recipes Based on Pantry':
+        return [
+          "Pantry Recipe 1",
+          "Pantry Recipe 2",
+          "Pantry Recipe 3",
+          "Pantry Recipe 4",
+          "Pantry Recipe 5"
+        ];
+      case 'Recipes Based on Diet':
+        return [
+          "Diet Recipe 1",
+          "Diet Recipe 2",
+          "Diet Recipe 3",
+          "Diet Recipe 4",
+          "Diet Recipe 5"
+        ];
+      default:
+        return [];
+    }
+  }
+
+  // Function to get meal image URL
+  String? getMealImage(String meal) {
+    switch (meal) {
+      case 'Breakfast':
+        return 'https://friendlysrestaurants.com/assets/live/img/production/detail/menu/breakfast_breakfast-classics_big-two-do-breakfast.jpg';
+      case 'Lunch':
+        return 'https://www.zupans.com/app/uploads/2016/10/lunchbox-sandwich-web.jpg';
+      case 'Dinner':
+        return 'https://myplate-prod.azureedge.us/sites/default/files/styles/large/public/2020-11/SkilletPastaDinner_527x323.jpg?itok=SxmNNwfM';
+      case 'Snack':
+        return 'https://www.eatthis.com/wp-content/uploads/sites/4/2017/07/fruit-nut-almond-strawberry-orange-snack-bowl.jpg';
+      default:
+        return null;
+    }
+  }
+
+  // Reload the system-recommended meal (image and nutrient info)
+  void _reloadSystemRecommendedMeal() {
+    setState(() {
+      _mealImageUrl = getMealImage(_selectedMeal!); // Reload the meal image URL
+      // Optionally, you can update the nutrient information here if you fetch it dynamically
+    });
+  }
+
+  // Reload the meal options for User Defined meals
+  void _reloadMealOptions() {
+    setState(() {
+      _selectedMealOption = null;
+      _selectedSubMealOption = null;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Schedule Page', style: TextStyle(fontSize: 24)),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Center(child: Text("Scheduler")),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0), // Controls divider height
+          child: Divider(
+            color: Colors.grey, // Change color as needed
+            thickness: 2.0, // Adjust thickness as needed
+            height: 1, // Ensures it's right under the AppBar
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Date Picker
+              ElevatedButton(
+                onPressed: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedDate = pickedDate;
+                      _showDummyMeals = pickedDate.isBefore(DateTime.now());
+                    });
+                  }
+                },
+                child: Text(
+                  _selectedDate == null
+                      ? "Select Date"
+                      : "Selected: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}",
+                ),
+              ),
+
+              if (_showDummyMeals)
+                _buildDummyMealList() // Show dummy meal list for past dates
+              else ...[
+                const SizedBox(height: 10),
+
+                // Time Picker
+                ElevatedButton(
+                  onPressed: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (pickedTime != null) {
+                      setState(() {
+                        _selectedTime = pickedTime;
+                      });
+                    }
+                  },
+                  child: Text(
+                    _selectedTime == null
+                        ? "Select Time"
+                        : "Selected Time: ${_selectedTime!.format(context)}",
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Meal Selection Dropdown with Reload Icon
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: DropdownButton<String>(
+                        value: _selectedMeal,
+                        hint: const Text("Select Meal"),
+                        items: meals.map((String meal) {
+                          return DropdownMenuItem<String>(
+                            value: meal,
+                            child: Text(meal),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedMeal = newValue;
+                            if (newValue != null) {
+                              _mealImageUrl = getMealImage(newValue);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.refresh),
+                      onPressed: _selectedMeal != null
+                          ? _reloadSystemRecommendedMeal
+                          : null,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Toggle System Recommended vs User Defined
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("System Recommended"),
+                    Switch(
+                      value: _isUserDefined,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isUserDefined = value;
+                          _selectedMealOption = null;
+                          _userImage = null;
+                        });
+                      },
+                    ),
+                    const Text("User Defined Meals"),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Meal Option Selection (for User Defined) with Reload Icon
+                if (_isUserDefined)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: DropdownButton<String>(
+                          value: _selectedMealOption,
+                          hint: const Text("Select Meal Option"),
+                          items: mealOptions.map((String option) {
+                            return DropdownMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedMealOption = newValue;
+                              _selectedSubMealOption =
+                                  null; // Reset the sub-dropdown
+                            });
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.refresh),
+                        onPressed: _reloadMealOptions,
+                      ),
+                    ],
+                  ),
+
+                const SizedBox(height: 20),
+
+                // New Sub Meal Option Dropdown (appears after selecting Saved Recipes, Recipes Based on Pantry, or Recipes Based on Diet)
+                if (_selectedMealOption != null)
+                  DropdownButton<String>(
+                    value: _selectedSubMealOption,
+                    hint: const Text("Select a Sub Meal Option"),
+                    items: getSubMealOptions(_selectedMealOption!)
+                        .map((String option) {
+                      return DropdownMenuItem<String>(
+                        value: option,
+                        child: Text(option),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedSubMealOption = newValue;
+                      });
+                    },
+                  ),
+
+                const SizedBox(height: 20),
+
+                // Image Display
+                Center(
+                  child: Container(
+                    width: 250,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: _isUserDefined && _userImage == null
+                        ? const Center(child: Text("Image Loading..."))
+                        : _isUserDefined
+                            ? Image.file(File(_userImage!.path),
+                                fit: BoxFit.cover)
+                            : _mealImageUrl != null
+                                ? Image.network(_mealImageUrl!,
+                                    fit: BoxFit.cover)
+                                : const Center(child: Text("No Image")),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Nutrient Information
+                Card(
+                  elevation: 3,
+                  margin: const EdgeInsets.all(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Text("Meal Name",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text("Nutrient Information",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        const Text("Calories: 500 kcal"),
+                        const Text("Protein: 20g"),
+                        const Text("Carbs: 50g"),
+                        const Text("Fats: 15g"),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Schedule committed!")),
+                        );
+                      },
+                      child: const Text("Commit to Schedule"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectedDate = null;
+                          _selectedTime = null;
+                          _selectedMeal = null;
+                          _isUserDefined = false;
+                          _selectedMealOption = null;
+                          _selectedSubMealOption =
+                              null; // Reset sub meal option
+                          _mealImageUrl = null; // Reset meal image URL
+                          _userImage = null; // Clear user image
+                        });
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -924,8 +1298,8 @@ class _PageSixState extends State<PageSix> {
     double totalDailyCalories = 2000.0; // Daily calorie goal
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calorie Tracker Home'),
-        centerTitle: true, // Centers the title
+          title: const Text('Calorie Tracker Home'),
+          centerTitle: true, // Centers the title
           actions: [
             IconButton(
               // ignore: prefer_const_constructors
@@ -1140,7 +1514,8 @@ class _MealCategoryBoxState extends State<MealCategoryBox> {
   }
 
   Future<void> _takePicture() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -1268,7 +1643,8 @@ class _MealCategoryBoxState extends State<MealCategoryBox> {
                     children: [
                       Text(
                         '${widget.totalCalories.toStringAsFixed(0)} cal',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         '${(percentage * 100).toStringAsFixed(1)}%',
@@ -1308,16 +1684,3 @@ class _MealCategoryBoxState extends State<MealCategoryBox> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
