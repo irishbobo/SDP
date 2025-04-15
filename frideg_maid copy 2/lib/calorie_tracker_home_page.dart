@@ -15,11 +15,10 @@ class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
   // List of pages
   final List<Widget> _pages = [
     const PageOne(), // Fridge
-    const PageFive(), // Recipes
+    const PageFive(), // Calorie Tracker Home
     const PageTwo(), // Home
     const PageThree(), // Schedule
-    const PageFour(), // Settings
-    const PageSix(), // Calorie Tracker Home
+    const PageFour(), // Recipes
   ];
 
   // Function to handle tab switch

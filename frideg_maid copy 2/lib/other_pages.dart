@@ -22,19 +22,19 @@ class PageOne extends StatefulWidget {
 }
 
 class _PageOneState extends State<PageOne> {
-  // List to hold food items
   final List<Map<String, dynamic>> _foodItems = [];
   final List<Map<String, dynamic>> _pantryItems = [];
   final double cardHeight = 30.0;
 
-  // Add Food button logic to navigate to AddFoodPage
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   void _addFood() async {
     final Map<String, dynamic>? newFood = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddFoodPage()),
     );
 
-    // If data is not null, add it to the food items list
     if (newFood != null) {
       setState(() {
         _foodItems.add(newFood);
@@ -42,14 +42,12 @@ class _PageOneState extends State<PageOne> {
     }
   }
 
-  // Add Pantry button logic to navigate to AddPantryPage
   void _addPantry() async {
     final Map<String, dynamic>? newPantry = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddPantryPage()),
     );
 
-    // If data is not null, add it to the food items list
     if (newPantry != null) {
       setState(() {
         _pantryItems.add(newPantry);
@@ -57,7 +55,6 @@ class _PageOneState extends State<PageOne> {
     }
   }
 
-  // Navigate to the Food Detail Page when a food box is clicked
   void _viewFoodDetail(Map<String, dynamic> food) {
     Navigator.push(
       context,
@@ -67,73 +64,54 @@ class _PageOneState extends State<PageOne> {
     );
   }
 
+  List<Map<String, dynamic>> get _filteredItems {
+    if (_searchQuery.isEmpty) return _foodItems;
+    return _foodItems.where((item) {
+      final name = item['name']?.toString().toLowerCase() ?? '';
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Your Fridge'),
-          centerTitle: true, // Centers the title
-          actions: [
-            /*IconButton(
-              // ignore: prefer_const_constructors
-              icon: Row(
-                mainAxisSize: MainAxisSize
-                    .min, // Ensures the row doesn't take up all available space
-                children: const [
-                  Icon(Icons.add_box), // Profile icon
-                  SizedBox(
-                      width:
-                          8), // Adds a little spacing between the icon and the text
-                  Text(
-                    "Add Pantry", // Your text here
-                    style: TextStyle(fontSize: 14), // Small text style
-                  ),
-                ],
+        title: const Text('Your Fridge'),
+        centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search for food...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
-              onPressed: _addPantry,
-        
-            ),
-            IconButton(
-              // ignore: prefer_const_constructors
-              icon: Row(
-                mainAxisSize: MainAxisSize
-                    .min, // Ensures the row doesn't take up all available space
-                children: const [
-                  Icon(Icons.kitchen), // Profile icon
-                  SizedBox(
-                      width:
-                          8), // Adds a little spacing between the icon and the text
-                  Text(
-                    "Add Fridge", // Your text here
-                    style: TextStyle(fontSize: 14), // Small text style
-                  ),
-                ],
-              ),
-              onPressed: () {
-                // Navigate to the ----- page when clicked
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BMICalculator(),
-                  ),
-                );
-                const Divider(
-                  thickness: 2, // Adjust the thickness as needed
-                  color: Colors.grey, // Adjust the color as needed
-                );
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
               },
-            ),*/
-          ]),
+            ),
+          ),
+        ),
+      ),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, // 2 columns in the grid
+          crossAxisCount: 2,
           mainAxisExtent: 100,
-          crossAxisSpacing: 8.0, // Spacing between columns
-          mainAxisSpacing: 8.0, // Spacing between rows
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
         ),
-        itemCount: _foodItems.length,
+        itemCount: _filteredItems.length,
         itemBuilder: (context, index) {
-          final food = _foodItems[index];
+          final food = _filteredItems[index];
           return GestureDetector(
             onTap: () => _viewFoodDetail(food),
             child: Card(
@@ -142,7 +120,7 @@ class _PageOneState extends State<PageOne> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Container(
-                height: cardHeight, // Control the height here
+                height: cardHeight,
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -172,6 +150,7 @@ class _PageOneState extends State<PageOne> {
     );
   }
 }
+
 
 // Page 2 Home
 class PageTwo extends StatefulWidget {
@@ -563,23 +542,24 @@ class _PageTwoState extends State<PageTwo> {
 
 // Page 3 Schedule
 
-class PageThree extends StatefulWidget {
+class PageThree extends StatefulWidget 
+{
   const PageThree({super.key});
 
-  @override
+@override
   _PageThreeState createState() => _PageThreeState();
 }
 
 class _PageThreeState extends State<PageThree> {
-  DateTime? _selectedDate;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDate = DateTime.now();
   TimeOfDay? _selectedTime;
   String? _selectedMeal;
   bool _isUserDefined = false;
   String? _selectedMealOption;
-  String? _selectedSubMealOption; // Added for the new dropdown
+  String? _selectedSubMealOption;
   String? _mealImageUrl;
   XFile? _userImage;
-  bool _showDummyMeals = false; // Flag to track past date selection
 
   final List<String> meals = ["Breakfast", "Lunch", "Dinner", "Snack"];
   final List<String> mealOptions = [
@@ -589,67 +569,44 @@ class _PageThreeState extends State<PageThree> {
   ];
 
   final List<Map<String, String>> dummyMeals = [
-    {"title": "BREAKFAST: Oatmeal & Berries", "calories": "250 kcal,",},
+    {"title": "BREAKFAST: Oatmeal & Berries", "calories": "250 kcal"},
     {"title": "LUNCH: Chicken Salad", "calories": "400 kcal"},
     {"title": "DINNER: Grilled Fish & Rice", "calories": "550 kcal"},
     {"title": "SNACK: Yogurt & Nuts", "calories": "200 kcal"},
   ];
 
-  // Dummy meal UI with Back to Scheduler button
-  Widget _buildDummyMealList() {
-    return Column(
-      children: [
-        const Text(
-          "Meal History for Selected Date",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        ...dummyMeals.map((meal) => Card(
-              child: ListTile(
-                title: Text(meal["title"]!),
-                subtitle: Text("Calories: ${meal["calories"]}"),
-              ),
-            )),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _showDummyMeals = false; // Restore normal mode
-            });
-          },
-          child: const Text("Back to Scheduler"),
-        ),
-      ],
-    );
+  Map<String, bool> mealCompletionStatus = {
+    "Breakfast": false,
+    "Lunch": false,
+    "Dinner": false,
+    "Snack": false,
+  };
+
+  bool isToday(DateTime date) {
+    final now = DateTime.now();
+    return now.year == date.year &&
+        now.month == date.month &&
+        now.day == date.day;
   }
 
-  // Function to fetch the options for the subcategory dropdown
+  bool isPast(DateTime date) {
+    final today = DateTime.now();
+    return date.isBefore(DateTime(today.year, today.month, today.day));
+  }
+
   List<String> getSubMealOptions(String mealOption) {
     switch (mealOption) {
       case 'Saved Recipes':
-        return ["Recipe 1", "Recipe 2", "Recipe 3", "Recipe 4", "Recipe 5"];
+        return ["Recipe 1", "Recipe 2", "Recipe 3"];
       case 'Recipes Based on Pantry':
-        return [
-          "Pantry Recipe 1",
-          "Pantry Recipe 2",
-          "Pantry Recipe 3",
-          "Pantry Recipe 4",
-          "Pantry Recipe 5"
-        ];
+        return ["Pantry Recipe 1", "Pantry Recipe 2"];
       case 'Recipes Based on Diet':
-        return [
-          "Diet Recipe 1",
-          "Diet Recipe 2",
-          "Diet Recipe 3",
-          "Diet Recipe 4",
-          "Diet Recipe 5"
-        ];
+        return ["Diet Recipe 1", "Diet Recipe 2"];
       default:
         return [];
     }
   }
 
-  // Function to get meal image URL
   String? getMealImage(String meal) {
     switch (meal) {
       case 'Breakfast':
@@ -665,15 +622,12 @@ class _PageThreeState extends State<PageThree> {
     }
   }
 
-  // Reload the system-recommended meal (image and nutrient info)
   void _reloadSystemRecommendedMeal() {
     setState(() {
-      _mealImageUrl = getMealImage(_selectedMeal!); // Reload the meal image URL
-      // Optionally, you can update the nutrient information here if you fetch it dynamically
+      _mealImageUrl = getMealImage(_selectedMeal!);
     });
   }
 
-  // Reload the meal options for User Defined meals
   void _reloadMealOptions() {
     setState(() {
       _selectedMealOption = null;
@@ -681,497 +635,287 @@ class _PageThreeState extends State<PageThree> {
     });
   }
 
+  Widget _buildDummyMealList() {
+    return Column(
+      children: [
+        const Text(
+          "Meal History for Selected Date",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        ...dummyMeals.map((meal) => Card(
+              child: ListTile(
+                title: Text(meal["title"]!),
+                subtitle: Text("Calories: ${meal["calories"]}"),
+              ),
+            )),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool showDummyMeals = isPast(_selectedDate!);
+    final bool isCurrentDay = isToday(_selectedDate!);
+
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text("Scheduler")),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0), // Controls divider height
-          child: Divider(
-            color: Colors.grey, // Change color as needed
-            thickness: 2.0, // Adjust thickness as needed
-            height: 1, // Ensures it's right under the AppBar
-          ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1.0),
+          child: Divider(thickness: 2.0),
         ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Date Picker
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TableCalendar(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDate = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
+              calendarStyle: const CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (showDummyMeals)
+              _buildDummyMealList()
+            else ...[
               ElevatedButton(
                 onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
+                  TimeOfDay? pickedTime = await showTimePicker(
                     context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
+                    initialTime: TimeOfDay.now(),
                   );
-                  if (pickedDate != null) {
+                  if (pickedTime != null) {
                     setState(() {
-                      _selectedDate = pickedDate;
-                      _showDummyMeals = pickedDate.isBefore(DateTime.now());
+                      _selectedTime = pickedTime;
                     });
                   }
                 },
-                child: Text(
-                  _selectedDate == null
-                      ? "Select Date"
-                      : "Selected: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}",
-                ),
+                child: Text(_selectedTime == null
+                    ? "Select Time"
+                    : "Selected Time: ${_selectedTime!.format(context)}"),
               ),
-
-              if (_showDummyMeals)
-                _buildDummyMealList() // Show dummy meal list for past dates
-              else ...[
-                const SizedBox(height: 10),
-
-                // Time Picker
-                ElevatedButton(
-                  onPressed: () async {
-                    TimeOfDay? pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                    );
-                    if (pickedTime != null) {
-                      setState(() {
-                        _selectedTime = pickedTime;
-                      });
-                    }
-                  },
-                  child: Text(
-                    _selectedTime == null
-                        ? "Select Time"
-                        : "Selected Time: ${_selectedTime!.format(context)}",
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: DropdownButton<String>(
+                      value: _selectedMeal,
+                      hint: const Text("Select Meal"),
+                      items: meals.map((String meal) {
+                        return DropdownMenuItem<String>(
+                          value: meal,
+                          child: Text(meal),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedMeal = newValue;
+                          if (newValue != null) {
+                            _mealImageUrl = getMealImage(newValue);
+                          }
+                        });
+                      },
+                    ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _selectedMeal != null
+                        ? _reloadSystemRecommendedMeal
+                        : null,
+                  ),
+                ],
+              ),
+              if (_selectedMeal != null && isCurrentDay)
+                CheckboxListTile(
+                  title: Text("Mark ${_selectedMeal!} as Completed"),
+                  value: mealCompletionStatus[_selectedMeal!] ?? false,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      mealCompletionStatus[_selectedMeal!] = value ?? false;
+                    });
+                  },
                 ),
-
-                const SizedBox(height: 20),
-
-                // Meal Selection Dropdown with Reload Icon
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("System Recommended"),
+                  Switch(
+                    value: _isUserDefined,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isUserDefined = value;
+                        _selectedMealOption = null;
+                        _userImage = null;
+                      });
+                    },
+                  ),
+                  const Text("User Defined Meals"),
+                ],
+              ),
+              const SizedBox(height: 20),
+              if (_isUserDefined)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Flexible(
                       child: DropdownButton<String>(
-                        value: _selectedMeal,
-                        hint: const Text("Select Meal"),
-                        items: meals.map((String meal) {
+                        value: _selectedMealOption,
+                        hint: const Text("Select Meal Option"),
+                        items: mealOptions.map((String option) {
                           return DropdownMenuItem<String>(
-                            value: meal,
-                            child: Text(meal),
+                            value: option,
+                            child: Text(option),
                           );
                         }).toList(),
                         onChanged: (String? newValue) {
                           setState(() {
-                            _selectedMeal = newValue;
-                            if (newValue != null) {
-                              _mealImageUrl = getMealImage(newValue);
-                            }
+                            _selectedMealOption = newValue;
+                            _selectedSubMealOption = null;
                           });
                         },
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.refresh),
-                      onPressed: _selectedMeal != null
-                          ? _reloadSystemRecommendedMeal
-                          : null,
+                      icon: const Icon(Icons.refresh),
+                      onPressed: _reloadMealOptions,
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 20),
-
-                // Toggle System Recommended vs User Defined
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("System Recommended"),
-                    Switch(
-                      value: _isUserDefined,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isUserDefined = value;
-                          _selectedMealOption = null;
-                          _userImage = null;
-                        });
-                      },
-                    ),
-                    const Text("User Defined Meals"),
-                  ],
+              if (_selectedMealOption != null)
+                DropdownButton<String>(
+                  value: _selectedSubMealOption,
+                  hint: const Text("Select a Sub Meal Option"),
+                  items: getSubMealOptions(_selectedMealOption!)
+                      .map((String option) {
+                    return DropdownMenuItem<String>(
+                      value: option,
+                      child: Text(option),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedSubMealOption = newValue;
+                    });
+                  },
                 ),
-
-                const SizedBox(height: 20),
-
-                // Meal Option Selection (for User Defined) with Reload Icon
-                if (_isUserDefined)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: DropdownButton<String>(
-                          value: _selectedMealOption,
-                          hint: const Text("Select Meal Option"),
-                          items: mealOptions.map((String option) {
-                            return DropdownMenuItem<String>(
-                              value: option,
-                              child: Text(option),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedMealOption = newValue;
-                              _selectedSubMealOption =
-                                  null; // Reset the sub-dropdown
-                            });
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.refresh),
-                        onPressed: _reloadMealOptions,
-                      ),
+              const SizedBox(height: 20),
+              Center(
+                child: Container(
+                  width: 250,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: _isUserDefined && _userImage == null
+                      ? const Center(child: Text("Image Loading..."))
+                      : _isUserDefined
+                          ? Image.file(File(_userImage!.path),
+                              fit: BoxFit.cover)
+                          : _mealImageUrl != null
+                              ? Image.network(_mealImageUrl!,
+                                  fit: BoxFit.cover)
+                              : const Center(child: Text("No Image")),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Card(
+                elevation: 3,
+                margin: const EdgeInsets.all(10),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: const [
+                      Text("Meal Name",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text("Nutrient Information",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text("Calories: 500 kcal"),
+                      Text("Protein: 20g"),
+                      Text("Carbs: 50g"),
+                      Text("Fats: 15g"),
                     ],
                   ),
-
-                const SizedBox(height: 20),
-
-                // New Sub Meal Option Dropdown (appears after selecting Saved Recipes, Recipes Based on Pantry, or Recipes Based on Diet)
-                if (_selectedMealOption != null)
-                  DropdownButton<String>(
-                    value: _selectedSubMealOption,
-                    hint: const Text("Select a Sub Meal Option"),
-                    items: getSubMealOptions(_selectedMealOption!)
-                        .map((String option) {
-                      return DropdownMenuItem<String>(
-                        value: option,
-                        child: Text(option),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Schedule committed!")),
                       );
-                    }).toList(),
-                    onChanged: (String? newValue) {
+                    },
+                    child: const Text("Commit to Schedule"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
                       setState(() {
-                        _selectedSubMealOption = newValue;
+                        _selectedTime = null;
+                        _selectedMeal = null;
+                        _isUserDefined = false;
+                        _selectedMealOption = null;
+                        _selectedSubMealOption = null;
+                        _mealImageUrl = null;
+                        _userImage = null;
                       });
                     },
+                    child: const Text("Cancel"),
                   ),
-
-                const SizedBox(height: 20),
-
-                // Image Display
-                Center(
-                  child: Container(
-                    width: 250,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: _isUserDefined && _userImage == null
-                        ? const Center(child: Text("Image Loading..."))
-                        : _isUserDefined
-                            ? Image.file(File(_userImage!.path),
-                                fit: BoxFit.cover)
-                            : _mealImageUrl != null
-                                ? Image.network(_mealImageUrl!,
-                                    fit: BoxFit.cover)
-                                : const Center(child: Text("No Image")),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // Nutrient Information
-                Card(
-                  elevation: 3,
-                  margin: const EdgeInsets.all(10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Text("Meal Name",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
-                        const Text("Nutrient Information",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                        const Text("Calories: 500 kcal"),
-                        const Text("Protein: 20g"),
-                        const Text("Carbs: 50g"),
-                        const Text("Fats: 15g"),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Schedule committed!")),
-                        );
-                      },
-                      child: const Text("Commit to Schedule"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedDate = null;
-                          _selectedTime = null;
-                          _selectedMeal = null;
-                          _isUserDefined = false;
-                          _selectedMealOption = null;
-                          _selectedSubMealOption =
-                              null; // Reset sub meal option
-                          _mealImageUrl = null; // Reset meal image URL
-                          _userImage = null; // Clear user image
-                        });
-                      },
-                      child: const Text("Cancel"),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Page 4
-class PageFour extends StatelessWidget {
+
+// Page 4 Recipes
+class PageFour extends StatefulWidget {
   const PageFour({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SettingsPage(),
-    );
-  }
+  _PageFourState createState() => _PageFourState();
 }
 
-class SettingsPage extends StatefulWidget {
-  @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  String selectedCalorieView = 'Daily View';
-  String selectedMealPreference = 'Breakfast';
-  String selectedFitnessGoal = 'Lose Weight';
-  String selectedDietaryPreference = 'Keto';
-  String selectedAllergen = 'Peanuts';
-  final TextEditingController maxCaloriesController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              // User Account Picture
-              CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage(
-                    'assets/images/3.0x/flutter_logo.png'), // Replace with your asset image
-              ),
-              SizedBox(height: 20),
-
-              // Username Information
-              Text(
-                'John Doe',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-
-              // Email Information
-              Text(
-                'johndoe@example.com',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-
-              // Max Daily Calories Input
-              TextFormField(
-                controller: maxCaloriesController,
-                decoration: InputDecoration(
-                  labelText: 'Max Daily Calories',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              SizedBox(height: 20),
-
-              // Home Page Calorie View Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedCalorieView,
-                decoration: InputDecoration(
-                  labelText: 'Home Page Calorie View',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Daily View', 'Weekly View']
-                    .map((view) => DropdownMenuItem<String>(
-                          value: view,
-                          child: Text(view),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalorieView = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Recommended Meals Preference Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedMealPreference,
-                decoration: InputDecoration(
-                  labelText: 'Recommended Meals Preference',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Randomize']
-                    .map((meal) => DropdownMenuItem<String>(
-                          value: meal,
-                          child: Text(meal),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedMealPreference = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Fitness Goal Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedFitnessGoal,
-                decoration: InputDecoration(
-                  labelText: 'Fitness Goal',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Lose Weight', 'Bulk', 'Healthy Eating', 'Maintenance']
-                    .map((goal) => DropdownMenuItem<String>(
-                          value: goal,
-                          child: Text(goal),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedFitnessGoal = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Dietary Preferences Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedDietaryPreference,
-                decoration: InputDecoration(
-                  labelText: 'Dietary Preferences',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Keto', 'Vegan', 'Low-Carb', 'Paleo', 'Pescatarian']
-                    .map((preference) => DropdownMenuItem<String>(
-                          value: preference,
-                          child: Text(preference),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedDietaryPreference = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Allergens Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedAllergen,
-                decoration: InputDecoration(
-                  labelText: 'Allergens',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Peanuts', 'Dairy', 'Gluten', 'Other']
-                    .map((allergen) => DropdownMenuItem<String>(
-                          value: allergen,
-                          child: Text(allergen),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedAllergen = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Save Button
-              ElevatedButton(
-                onPressed: () {
-                  // Handle save functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Settings saved')),
-                  );
-                },
-                child: Text('Save'),
-              ),
-              SizedBox(height: 20),
-
-              // Logout Button
-              ElevatedButton(
-                onPressed: () {
-                  // Handle logout functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Logged out')),
-                  );
-                },
-                child: Text('Logout'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Page 5 Recipes
-class PageFive extends StatefulWidget {
-  const PageFive({super.key});
-
-  @override
-  _PageFiveState createState() => _PageFiveState();
-}
-
-class _PageFiveState extends State<PageFive> {
-  // List to hold food items
+class _PageFourState extends State<PageFour> {
   final List<Map<String, dynamic>> _recipeItems = [];
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
-  // Add Food button logic to navigate to AddFoodPage
   void _addRecipe() async {
     final Map<String, dynamic>? newRecipe = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddRecipePage()),
     );
 
-    // If data is not null, add it to the food items list
     if (newRecipe != null) {
       setState(() {
         _recipeItems.add(newRecipe);
@@ -1179,7 +923,6 @@ class _PageFiveState extends State<PageFive> {
     }
   }
 
-  // Navigate to the Food Detail Page when a food box is clicked
   void _viewRecipeDetail(Map<String, dynamic> recipe) {
     Navigator.push(
       context,
@@ -1189,22 +932,53 @@ class _PageFiveState extends State<PageFive> {
     );
   }
 
+  List<Map<String, dynamic>> get _filteredItems {
+    if (_searchQuery.isEmpty) return _recipeItems;
+    return _recipeItems.where((item) {
+      final name = item['name']?.toString().toLowerCase() ?? '';
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipe Book'),
         centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search for recipes...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+        ),
       ),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1, // 1 column in the grid
+          crossAxisCount: 1,
           crossAxisSpacing: 1,
-          mainAxisSpacing: 10.0, // Spacing between rows
+          mainAxisSpacing: 10.0,
         ),
-        itemCount: _recipeItems.length,
+        itemCount: _filteredItems.length,
         itemBuilder: (context, index) {
-          final recipe = _recipeItems[index];
+          final recipe = _filteredItems[index];
           return GestureDetector(
             onTap: () => _viewRecipeDetail(recipe),
             child: Card(
@@ -1238,16 +1012,17 @@ class _PageFiveState extends State<PageFive> {
   }
 }
 
-// Page 6 Calorie Tracker Home
 
-class PageSix extends StatefulWidget {
-  const PageSix({super.key});
+// Page 5 Calorie Tracker Home
+
+class PageFive extends StatefulWidget {
+  const PageFive({super.key});
 
   @override
-  _PageSixState createState() => _PageSixState();
+  _PageFiveState createState() => _PageFiveState();
 }
 
-class _PageSixState extends State<PageSix> {
+class _PageFiveState extends State<PageFive> {
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
