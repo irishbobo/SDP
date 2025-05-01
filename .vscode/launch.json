@@ -12,15 +12,15 @@
             "type": "dart"
         },
         {
-            "name": "frideg_maid (profile mode)",
-            "cwd": "frideg_maid",
+            "name": "frideg_maid copy 2(profile mode)",
+            "cwd": "frideg_maid copy 2",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "frideg_maid (release mode)",
-            "cwd": "frideg_maid",
+            "name": "frideg_maid copy 2(release mode)",
+            "cwd": "frideg_maid copy 2",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

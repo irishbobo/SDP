@@ -15,11 +15,10 @@ class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
   // List of pages
   final List<Widget> _pages = [
     const PageOne(), // Fridge
-    const PageFive(), // Recipes
+    const PageFive(), // Calorie Tracker Home
     const PageTwo(), // Home
     const PageThree(), // Schedule
-    const PageFour(), // Settings
-    const PageSix(), // Calorie Tracker Home
+    const PageFour(), // Recipes
   ];
 
   // Function to handle tab switch
@@ -33,8 +32,23 @@ class _CalorieTrackerHomeState extends State<CalorieTrackerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true, // Center the title
-        title: const Text('Fridge Maid'), // Set the title to "Fridge Maid"
+        title: Row(
+          mainAxisSize: MainAxisSize
+              .min, // To ensure the row takes only as much space as needed
+          children: [
+            Image.asset(
+              'assets/images/Fridge_Maid_Logo.gif', // Replace with your logo path
+              height: 40.0, // Size the logo
+            ),
+            const SizedBox(width: 8), // Add some space between the logo and the title
+            const Text(
+              'Fridge Maid', // Set the title to "Fridge Maid"
+              style: TextStyle(
+                fontWeight: FontWeight.bold, // Make the title bold
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle), // Profile icon

@@ -9,6 +9,9 @@ import 'recipe_detail_page.dart';
 import 'bmi_calculator_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 // Page One Fridge
 class PageOne extends StatefulWidget {
@@ -19,33 +22,32 @@ class PageOne extends StatefulWidget {
 }
 
 class _PageOneState extends State<PageOne> {
-  // List to hold food items
   final List<Map<String, dynamic>> _foodItems = [];
   final List<Map<String, dynamic>> _pantryItems = [];
   final double cardHeight = 30.0;
 
-  // Add Food button logic to navigate to AddFoodPage
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   void _addFood() async {
     final Map<String, dynamic>? newFood = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddFoodPage()),
     );
 
-    // If data is not null, add it to the food items list
     if (newFood != null) {
       setState(() {
         _foodItems.add(newFood);
       });
     }
   }
-  // Add Pantry button logic to navigate to AddPantryPage
+
   void _addPantry() async {
     final Map<String, dynamic>? newPantry = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddPantryPage()),
     );
 
-    // If data is not null, add it to the food items list
     if (newPantry != null) {
       setState(() {
         _pantryItems.add(newPantry);
@@ -53,7 +55,6 @@ class _PageOneState extends State<PageOne> {
     }
   }
 
-  // Navigate to the Food Detail Page when a food box is clicked
   void _viewFoodDetail(Map<String, dynamic> food) {
     Navigator.push(
       context,
@@ -63,73 +64,54 @@ class _PageOneState extends State<PageOne> {
     );
   }
 
+  List<Map<String, dynamic>> get _filteredItems {
+    if (_searchQuery.isEmpty) return _foodItems;
+    return _foodItems.where((item) {
+      final name = item['name']?.toString().toLowerCase() ?? '';
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Your Fridge'),
-          centerTitle: true, // Centers the title
-          actions: [
-            IconButton(
-              // ignore: prefer_const_constructors
-              icon: Row(
-                mainAxisSize: MainAxisSize
-                    .min, // Ensures the row doesn't take up all available space
-                children: const [
-                  Icon(Icons.add_box), // Profile icon
-                  SizedBox(
-                      width:
-                          8), // Adds a little spacing between the icon and the text
-                  Text(
-                    "Add Pantry", // Your text here
-                    style: TextStyle(fontSize: 14), // Small text style
-                  ),
-                ],
+        title: const Text('Your Fridge'),
+        centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search for food...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
-              onPressed: _addPantry,
-        
-            ),
-            IconButton(
-              // ignore: prefer_const_constructors
-              icon: Row(
-                mainAxisSize: MainAxisSize
-                    .min, // Ensures the row doesn't take up all available space
-                children: const [
-                  Icon(Icons.kitchen), // Profile icon
-                  SizedBox(
-                      width:
-                          8), // Adds a little spacing between the icon and the text
-                  Text(
-                    "Add Fridge", // Your text here
-                    style: TextStyle(fontSize: 14), // Small text style
-                  ),
-                ],
-              ),
-              onPressed: () {
-                // Navigate to the ----- page when clicked
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BMICalculator(),
-                  ),
-                );
-                const Divider(
-                  thickness: 2, // Adjust the thickness as needed
-                  color: Colors.grey, // Adjust the color as needed
-                );
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
               },
             ),
-          ]),
+          ),
+        ),
+      ),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, // 2 columns in the grid
+          crossAxisCount: 2,
           mainAxisExtent: 100,
-          crossAxisSpacing: 8.0, // Spacing between columns
-          mainAxisSpacing: 8.0, // Spacing between rows
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
         ),
-        itemCount: _foodItems.length,
+        itemCount: _filteredItems.length,
         itemBuilder: (context, index) {
-          final food = _foodItems[index];
+          final food = _filteredItems[index];
           return GestureDetector(
             onTap: () => _viewFoodDetail(food),
             child: Card(
@@ -138,7 +120,7 @@ class _PageOneState extends State<PageOne> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Container(
-                height: cardHeight, // Control the height here
+                height: cardHeight,
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -162,12 +144,13 @@ class _PageOneState extends State<PageOne> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addPantry,
+        onPressed: _addFood,
         child: const Icon(Icons.add),
       ),
     );
   }
 }
+
 
 // Page 2 Home
 class PageTwo extends StatefulWidget {
@@ -183,6 +166,40 @@ class _PageTwoState extends State<PageTwo> {
   DateTime? _selectedDay;
   double _calories = 0.0;
   String dropdownvalue = 'Breakfast';
+  List<Map<String, String>> meals = [
+    {
+      "name": "Spaghetti Bolognese",
+      "image":
+          "https://www.cookingwithnanaling.com/wp-content/uploads/2021/09/spaghetti-bolognese-sq.jpg"
+    },
+    {
+      "name": "Grilled Chicken Salad",
+      "image":
+          "https://www.eatingbirdfood.com/wp-content/uploads/2023/06/grilled-chicken-salad-hero.jpg"
+    },
+    {
+      "name": "Beef Tacos",
+      "image":
+          "https://kaynutrition.com/wp-content/uploads/2023/08/shredded-beef-tacos.jpg"
+    },
+    {
+      "name": "Vegetable Stir Fry",
+      "image":
+          "https://www.cookingclassy.com/wp-content/uploads/2019/12/chicken-stir-fry-1.jpg"
+    },
+    {
+      "name": "Pizza Margherita",
+      "image":
+          "https://kitchenswagger.com/wp-content/uploads/2023/05/margherita-pizza-close.jpg"
+    },
+    {
+      "name": "Sushi Platter",
+      "image":
+          "https://properfoodie.com/wp-content/uploads/2020/07/sushi-1-1.jpg"
+    },
+  ];
+  double cardHeight =
+      170; // Example fixed height for each card, you can adjust this
 
   void _addCalories() {
     showDialog(
@@ -197,7 +214,7 @@ class _PageTwoState extends State<PageTwo> {
               double dialogWidth =
                   constraints.maxWidth * 0.4; // % of screen width
               double dialogHeight =
-                  constraints.maxHeight * 0.65; // % of screen height
+                  constraints.maxHeight * 0.45; // % of screen height
 
               return Container(
                 width: dialogWidth,
@@ -238,8 +255,7 @@ class _PageTwoState extends State<PageTwo> {
                           child: Text(value),
                         );
                       }).toList(),
-                      hint: const Text(
-                          'Enter Max Calories Preferences (Daily or weekly)'),
+                      hint: const Text('View Preference'),
                       onChanged: (String? newValue) {
                         setState(() {
                           dropdownvalue = newValue!;
@@ -288,7 +304,7 @@ class _PageTwoState extends State<PageTwo> {
                             );
                           },
                         ),
-                        IconButton(
+                        /*IconButton(
                           icon: const Row(
                             children: [
                               Icon(Icons.list),
@@ -319,7 +335,7 @@ class _PageTwoState extends State<PageTwo> {
                               ),
                             );
                           },
-                        ),
+                        ),*/
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -362,6 +378,7 @@ class _PageTwoState extends State<PageTwo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Page'),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -418,12 +435,61 @@ class _PageTwoState extends State<PageTwo> {
           Expanded(
             child: Row(
               children: [
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'Recommended Meals',
-                      style: TextStyle(fontSize: 24),
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1, // Number of columns in the grid
+                      crossAxisSpacing: 8.0, // Horizontal spacing between items
+                      mainAxisSpacing: 8.0, // Vertical spacing between items
+                      childAspectRatio:
+                          0.80, // Aspect ratio of each card (height/width)
                     ),
+                    itemCount: meals.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Container(
+                          height:
+                              cardHeight, // Control the overall height of the card
+                          child: Column(
+                            children: [
+                              // Image section (Network Image)
+                              ClipRRect(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(10)),
+                                child: Image.network(
+                                  meals[index]["image"]!,
+                                  height: cardHeight *
+                                      0.9, // Image takes up 70% of card height
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              // Meal name section
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  meals[index]["name"]!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              const Text('Recommended For You',
+                                  style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const VerticalDivider(
@@ -435,7 +501,7 @@ class _PageTwoState extends State<PageTwo> {
                     onTap: _addCalories,
                     child: Center(
                       child: CircularPercentIndicator(
-                        radius: 100.0,
+                        radius: 90.0,
                         lineWidth: 10.0,
                         percent: _calories / 2000.0,
                         center: Column(
@@ -475,49 +541,381 @@ class _PageTwoState extends State<PageTwo> {
 }
 
 // Page 3 Schedule
-class PageThree extends StatelessWidget {
+
+class PageThree extends StatefulWidget 
+{
   const PageThree({super.key});
+
+@override
+  _PageThreeState createState() => _PageThreeState();
+}
+
+class _PageThreeState extends State<PageThree> {
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDate = DateTime.now();
+  TimeOfDay? _selectedTime;
+  String? _selectedMeal;
+  bool _isUserDefined = false;
+  String? _selectedMealOption;
+  String? _selectedSubMealOption;
+  String? _mealImageUrl;
+  XFile? _userImage;
+
+  final List<String> meals = ["Breakfast", "Lunch", "Dinner", "Snack"];
+  final List<String> mealOptions = [
+    "Saved Recipes",
+    "Recipes Based on Pantry",
+    "Recipes Based on Diet"
+  ];
+
+  final List<Map<String, String>> dummyMeals = [
+    {"title": "BREAKFAST: Oatmeal & Berries", "calories": "250 kcal"},
+    {"title": "LUNCH: Chicken Salad", "calories": "400 kcal"},
+    {"title": "DINNER: Grilled Fish & Rice", "calories": "550 kcal"},
+    {"title": "SNACK: Yogurt & Nuts", "calories": "200 kcal"},
+  ];
+
+  Map<String, bool> mealCompletionStatus = {
+    "Breakfast": false,
+    "Lunch": false,
+    "Dinner": false,
+    "Snack": false,
+  };
+
+  bool isToday(DateTime date) {
+    final now = DateTime.now();
+    return now.year == date.year &&
+        now.month == date.month &&
+        now.day == date.day;
+  }
+
+  bool isPast(DateTime date) {
+    final today = DateTime.now();
+    return date.isBefore(DateTime(today.year, today.month, today.day));
+  }
+
+  List<String> getSubMealOptions(String mealOption) {
+    switch (mealOption) {
+      case 'Saved Recipes':
+        return ["Recipe 1", "Recipe 2", "Recipe 3"];
+      case 'Recipes Based on Pantry':
+        return ["Pantry Recipe 1", "Pantry Recipe 2"];
+      case 'Recipes Based on Diet':
+        return ["Diet Recipe 1", "Diet Recipe 2"];
+      default:
+        return [];
+    }
+  }
+
+  String? getMealImage(String meal) {
+    switch (meal) {
+      case 'Breakfast':
+        return 'https://friendlysrestaurants.com/assets/live/img/production/detail/menu/breakfast_breakfast-classics_big-two-do-breakfast.jpg';
+      case 'Lunch':
+        return 'https://www.zupans.com/app/uploads/2016/10/lunchbox-sandwich-web.jpg';
+      case 'Dinner':
+        return 'https://myplate-prod.azureedge.us/sites/default/files/styles/large/public/2020-11/SkilletPastaDinner_527x323.jpg?itok=SxmNNwfM';
+      case 'Snack':
+        return 'https://www.eatthis.com/wp-content/uploads/sites/4/2017/07/fruit-nut-almond-strawberry-orange-snack-bowl.jpg';
+      default:
+        return null;
+    }
+  }
+
+  void _reloadSystemRecommendedMeal() {
+    setState(() {
+      _mealImageUrl = getMealImage(_selectedMeal!);
+    });
+  }
+
+  void _reloadMealOptions() {
+    setState(() {
+      _selectedMealOption = null;
+      _selectedSubMealOption = null;
+    });
+  }
+
+  Widget _buildDummyMealList() {
+    return Column(
+      children: [
+        const Text(
+          "Meal History for Selected Date",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        ...dummyMeals.map((meal) => Card(
+              child: ListTile(
+                title: Text(meal["title"]!),
+                subtitle: Text("Calories: ${meal["calories"]}"),
+              ),
+            )),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Schedule Page', style: TextStyle(fontSize: 24)),
+    final bool showDummyMeals = isPast(_selectedDate!);
+    final bool isCurrentDay = isToday(_selectedDate!);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Center(child: Text("Scheduler")),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1.0),
+          child: Divider(thickness: 2.0),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TableCalendar(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDate = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
+              calendarStyle: const CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (showDummyMeals)
+              _buildDummyMealList()
+            else ...[
+              ElevatedButton(
+                onPressed: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedTime != null) {
+                    setState(() {
+                      _selectedTime = pickedTime;
+                    });
+                  }
+                },
+                child: Text(_selectedTime == null
+                    ? "Select Time"
+                    : "Selected Time: ${_selectedTime!.format(context)}"),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: DropdownButton<String>(
+                      value: _selectedMeal,
+                      hint: const Text("Select Meal"),
+                      items: meals.map((String meal) {
+                        return DropdownMenuItem<String>(
+                          value: meal,
+                          child: Text(meal),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedMeal = newValue;
+                          if (newValue != null) {
+                            _mealImageUrl = getMealImage(newValue);
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _selectedMeal != null
+                        ? _reloadSystemRecommendedMeal
+                        : null,
+                  ),
+                ],
+              ),
+              if (_selectedMeal != null && isCurrentDay)
+                CheckboxListTile(
+                  title: Text("Mark ${_selectedMeal!} as Completed"),
+                  value: mealCompletionStatus[_selectedMeal!] ?? false,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      mealCompletionStatus[_selectedMeal!] = value ?? false;
+                    });
+                  },
+                ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("System Recommended"),
+                  Switch(
+                    value: _isUserDefined,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isUserDefined = value;
+                        _selectedMealOption = null;
+                        _userImage = null;
+                      });
+                    },
+                  ),
+                  const Text("User Defined Meals"),
+                ],
+              ),
+              const SizedBox(height: 20),
+              if (_isUserDefined)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: DropdownButton<String>(
+                        value: _selectedMealOption,
+                        hint: const Text("Select Meal Option"),
+                        items: mealOptions.map((String option) {
+                          return DropdownMenuItem<String>(
+                            value: option,
+                            child: Text(option),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedMealOption = newValue;
+                            _selectedSubMealOption = null;
+                          });
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: _reloadMealOptions,
+                    ),
+                  ],
+                ),
+              if (_selectedMealOption != null)
+                DropdownButton<String>(
+                  value: _selectedSubMealOption,
+                  hint: const Text("Select a Sub Meal Option"),
+                  items: getSubMealOptions(_selectedMealOption!)
+                      .map((String option) {
+                    return DropdownMenuItem<String>(
+                      value: option,
+                      child: Text(option),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedSubMealOption = newValue;
+                    });
+                  },
+                ),
+              const SizedBox(height: 20),
+              Center(
+                child: Container(
+                  width: 250,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: _isUserDefined && _userImage == null
+                      ? const Center(child: Text("Image Loading..."))
+                      : _isUserDefined
+                          ? Image.file(File(_userImage!.path),
+                              fit: BoxFit.cover)
+                          : _mealImageUrl != null
+                              ? Image.network(_mealImageUrl!,
+                                  fit: BoxFit.cover)
+                              : const Center(child: Text("No Image")),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Card(
+                elevation: 3,
+                margin: const EdgeInsets.all(10),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: const [
+                      Text("Meal Name",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text("Nutrient Information",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text("Calories: 500 kcal"),
+                      Text("Protein: 20g"),
+                      Text("Carbs: 50g"),
+                      Text("Fats: 15g"),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Schedule committed!")),
+                      );
+                    },
+                    child: const Text("Commit to Schedule"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedTime = null;
+                        _selectedMeal = null;
+                        _isUserDefined = false;
+                        _selectedMealOption = null;
+                        _selectedSubMealOption = null;
+                        _mealImageUrl = null;
+                        _userImage = null;
+                      });
+                    },
+                    child: const Text("Cancel"),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
 
-// Page 4
-class PageFour extends StatelessWidget {
+
+// Page 4 Recipes
+class PageFour extends StatefulWidget {
   const PageFour({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Settings', style: TextStyle(fontSize: 24)),
-    );
-  }
+  _PageFourState createState() => _PageFourState();
 }
 
-// Page 5 Recipes
-class PageFive extends StatefulWidget {
-  const PageFive({super.key});
-
-  @override
-  _PageFiveState createState() => _PageFiveState();
-}
-
-class _PageFiveState extends State<PageFive> {
-  // List to hold food items
+class _PageFourState extends State<PageFour> {
   final List<Map<String, dynamic>> _recipeItems = [];
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
-  // Add Food button logic to navigate to AddFoodPage
   void _addRecipe() async {
     final Map<String, dynamic>? newRecipe = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddRecipePage()),
     );
 
-    // If data is not null, add it to the food items list
     if (newRecipe != null) {
       setState(() {
         _recipeItems.add(newRecipe);
@@ -525,7 +923,6 @@ class _PageFiveState extends State<PageFive> {
     }
   }
 
-  // Navigate to the Food Detail Page when a food box is clicked
   void _viewRecipeDetail(Map<String, dynamic> recipe) {
     Navigator.push(
       context,
@@ -535,21 +932,53 @@ class _PageFiveState extends State<PageFive> {
     );
   }
 
+  List<Map<String, dynamic>> get _filteredItems {
+    if (_searchQuery.isEmpty) return _recipeItems;
+    return _recipeItems.where((item) {
+      final name = item['name']?.toString().toLowerCase() ?? '';
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipe Book'),
+        centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search for recipes...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+        ),
       ),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1, // 1 column in the grid
+          crossAxisCount: 1,
           crossAxisSpacing: 1,
-          mainAxisSpacing: 10.0, // Spacing between rows
+          mainAxisSpacing: 10.0,
         ),
-        itemCount: _recipeItems.length,
+        itemCount: _filteredItems.length,
         itemBuilder: (context, index) {
-          final recipe = _recipeItems[index];
+          final recipe = _filteredItems[index];
           return GestureDetector(
             onTap: () => _viewRecipeDetail(recipe),
             child: Card(
@@ -583,21 +1012,22 @@ class _PageFiveState extends State<PageFive> {
   }
 }
 
-// Page 6 Calorie Tracker Home
 
-class PageSix extends StatefulWidget {
-  const PageSix({super.key});
+// Page 5 Calorie Tracker Home
+
+class PageFive extends StatefulWidget {
+  const PageFive({super.key});
 
   @override
-  _PageSixState createState() => _PageSixState();
+  _PageFiveState createState() => _PageFiveState();
 }
 
-class _PageSixState extends State<PageSix> {
+class _PageFiveState extends State<PageFive> {
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  /*double _calories = 0.0;*/
 
+  // Text editing controllers for calories and descriptions
   final TextEditingController breakfastCaloriesController =
       TextEditingController();
   final TextEditingController lunchCaloriesController = TextEditingController();
@@ -613,8 +1043,34 @@ class _PageSixState extends State<PageSix> {
   final TextEditingController snackDescriptionController =
       TextEditingController();
 
+  // Variables to track calories for each meal
+  double _breakfastCalories = 0.0;
+  double _lunchCalories = 0.0;
+  double _dinnerCalories = 0.0;
+  double _snackCalories = 0.0;
+
+  // Calculate total calories for the day
+  double get _totalCalories =>
+      _breakfastCalories + _lunchCalories + _dinnerCalories + _snackCalories;
+
+  // Method to update meal calories and recalculate total
+  void _updateMealCalories(double calories, String mealType) {
+    setState(() {
+      if (mealType == 'Breakfast') {
+        _breakfastCalories = calories;
+      } else if (mealType == 'Lunch') {
+        _lunchCalories = calories;
+      } else if (mealType == 'Dinner') {
+        _dinnerCalories = calories;
+      } else if (mealType == 'Snack') {
+        _snackCalories = calories;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    double totalDailyCalories = 2000.0; // Daily calorie goal
     return Scaffold(
       appBar: AppBar(
           title: const Text('Calorie Tracker Home'),
@@ -631,7 +1087,7 @@ class _PageSixState extends State<PageSix> {
                       width:
                           8), // Adds a little spacing between the icon and the text
                   Text(
-                    "Calorie Calculator", // Your text here
+                    "Cal", // Your text here
                     style: TextStyle(fontSize: 14), // Small text style
                   ),
                 ],
@@ -657,7 +1113,7 @@ class _PageSixState extends State<PageSix> {
                       width:
                           8), // Adds a little spacing between the icon and the text
                   Text(
-                    "BMI Calculator", // Your text here
+                    "BMI", // Your text here
                     style: TextStyle(fontSize: 14), // Small text style
                   ),
                 ],
@@ -675,27 +1131,23 @@ class _PageSixState extends State<PageSix> {
           ]),
       body: Column(
         children: [
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),
+          const Divider(thickness: 2, color: Colors.grey),
+          // Calendar widget
           SizedBox(
-            height: 132, // Adjust the height as needed
+            height: 132,
             child: TableCalendar(
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
               calendarFormat: _calendarFormat,
-              availableCalendarFormats: const {
-                CalendarFormat.week: 'Week'
-              }, // Only week view
+              availableCalendarFormats: const {CalendarFormat.week: 'Week'},
               selectedDayPredicate: (day) {
                 return isSameDay(_selectedDay, day);
               },
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
                   _selectedDay = selectedDay;
-                  _focusedDay = focusedDay; // update `_focusedDay` here as well
+                  _focusedDay = focusedDay;
                 });
               },
               onPageChanged: (focusedDay) {
@@ -703,7 +1155,7 @@ class _PageSixState extends State<PageSix> {
               },
               calendarStyle: const CalendarStyle(
                 selectedDecoration: BoxDecoration(
-                  color: Colors.green, // Color the selected day green
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
@@ -712,241 +1164,87 @@ class _PageSixState extends State<PageSix> {
                 ),
               ),
               headerStyle: const HeaderStyle(
-                formatButtonVisible: false, // Hide the format button
+                formatButtonVisible: false,
                 titleCentered: true,
                 titleTextStyle: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ), // Placeholder for TableCalendar (to be replaced with actual TableCalendar widget)
-          ),
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),
-
-          // Content above the bottom boxes (if any)
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-
-                        //Use below to remembr the settings and variables: _calories
-                        /*percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Total'),
-                          ],
-                        ),*/
-
-                        percent: 1800 / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${1800.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 17),
-                            ),
-                            Text(
-                              '${(1800 / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Total'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: 350 / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${350.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            Text(
-                              '${(350 / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Breakfast'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: 450 / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${450.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            Text(
-                              '${(450 / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Lunch'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: 850 / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${850.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            Text(
-                              '${(850 / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Dinner'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: 150 / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${150.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            Text(
-                              '${(150 / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Snack'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
-          ), // Placeholder for other content
-
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
           ),
-
-          // The Row containing the four boxes at the bottom of the screen
-          Padding(
-            padding: const EdgeInsets.all(
-                8.0), // Add padding to create space around the boxes
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: MealCategoryBox(
-                    title: ' Breakfast:' '  (350 Calories today...)',
-                    caloriesController: breakfastCaloriesController,
-                    descriptionController: breakfastDescriptionController,
-                    onSave: () {
-                      print('Breakfast saved');
-                      // Handle save logic here (e.g., save data to a database)
-                    },
-                  ),
+          const Divider(thickness: 2, color: Colors.grey),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GridView.builder(
+                itemCount: 4,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  childAspectRatio: 1.2,
                 ),
-                const SizedBox(width: 16), // Space between the two boxes
-                Expanded(
-                  child: MealCategoryBox(
-                    title: ' Lunch:' '  (450 Calories today...)',
-                    caloriesController: lunchCaloriesController,
-                    descriptionController: lunchDescriptionController,
-                    onSave: () {
-                      print('Lunch saved');
-                      // Handle save logic here (e.g., save data to a database)
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16), // Space between the two boxes
-                Expanded(
-                  child: MealCategoryBox(
-                    title: ' Dinner:' '  (850 Calories today...)',
-                    caloriesController: dinnerCaloriesController,
-                    descriptionController: dinnerDescriptionController,
-                    onSave: () {
-                      print('Dinner saved');
-                      // Handle save logic here (e.g., save data to a database)
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16), // Space between the two boxes
-                Expanded(
-                  child: MealCategoryBox(
-                    title: ' Snack:' '  (150 Calories today...)',
-                    caloriesController: snackCaloriesController,
-                    descriptionController: snackDescriptionController,
-                    onSave: () {
-                      print('Snack saved');
-                      // Handle save logic here (e.g., save data to a database)
-                    },
-                  ),
-                ),
-              ],
+                itemBuilder: (context, index) {
+                  switch (index) {
+                    case 0:
+                      return MealCategoryBox(
+                        title:
+                            'Breakfast: ($_breakfastCalories Calories today...)',
+                        caloriesController: breakfastCaloriesController,
+                        descriptionController: breakfastDescriptionController,
+                        onSave: () {
+                          print('Breakfast saved');
+                        },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Breakfast');
+                        },
+                      );
+                    case 1:
+                      return MealCategoryBox(
+                        title: 'Lunch: ($_lunchCalories Calories today...)',
+                        caloriesController: lunchCaloriesController,
+                        descriptionController: lunchDescriptionController,
+                        onSave: () {
+                          print('Lunch saved');
+                        },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Lunch');
+                        },
+                      );
+                    case 2:
+                      return MealCategoryBox(
+                        title: 'Dinner: ($_dinnerCalories Calories today...)',
+                        caloriesController: dinnerCaloriesController,
+                        descriptionController: dinnerDescriptionController,
+                        onSave: () {
+                          print('Dinner saved');
+                        },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Dinner');
+                        },
+                      );
+                    case 3:
+                      return MealCategoryBox(
+                        title: 'Snack: ($_snackCalories Calories today...)',
+                        caloriesController: snackCaloriesController,
+                        descriptionController: snackDescriptionController,
+                        onSave: () {
+                          print('Snack saved');
+                        },
+                        totalCalories: _totalCalories,
+                        onCaloriesUpdated: (calories) {
+                          _updateMealCalories(calories, 'Snack');
+                        },
+                      );
+                    default:
+                      return Container();
+                  }
+                },
+              ),
             ),
           ),
         ],
@@ -955,392 +1253,209 @@ class _PageSixState extends State<PageSix> {
   }
 }
 
-class MealCategoryBox extends StatelessWidget {
+class MealCategoryBox extends StatefulWidget {
   final String title;
   final TextEditingController caloriesController;
   final TextEditingController descriptionController;
   final VoidCallback onSave;
+  final double totalCalories;
+  final Function(double) onCaloriesUpdated;
 
-  const MealCategoryBox({super.key, 
+  const MealCategoryBox({
+    super.key,
     required this.title,
     required this.caloriesController,
     required this.descriptionController,
     required this.onSave,
+    required this.totalCalories,
+    required this.onCaloriesUpdated,
   });
 
   @override
+  _MealCategoryBoxState createState() => _MealCategoryBoxState();
+}
+
+class _MealCategoryBoxState extends State<MealCategoryBox> {
+  double _calories = 0.0;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+  bool _hasImage = false;
+
+  void _addCalories() {
+    setState(() {
+      _calories = double.tryParse(widget.caloriesController.text) ?? 0.0;
+      widget.onCaloriesUpdated(_calories);
+    });
+  }
+
+  Future<void> _takePicture() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+        _hasImage = true;
+      });
+    }
+  }
+
+  void _showImagePopup() {
+    if (_image == null) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Meal Picture'),
+          content: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.file(
+              _image!,
+              fit: BoxFit.cover,
+              width: 200,
+              height: 200,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.blueAccent, width: 2), // Blue outline
-        borderRadius: BorderRadius.circular(8), // Rounded corners
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title
+            Text(
+              widget.title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 5), // Space between title and input fields
+            const SizedBox(height: 8),
 
-          // Calorie Input Field
-          TextField(
-            controller: caloriesController,
-            // ignore: prefer_const_constructors
-            decoration: InputDecoration(
-              labelText: 'Add Calories',
-              border: const OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-          ),
-          // ignore: prefer_const_constructors
-          SizedBox(
-              height: 5), // Space between calorie and description input fields
-
-          // Description Input Field
-          TextField(
-            controller: descriptionController,
-            // ignore: prefer_const_constructors
-            decoration: InputDecoration(
-              labelText: 'Description',
-              border: const OutlineInputBorder(),
-            ),
-            maxLines: 2, // Multi-line input for description
-          ),
-          const SizedBox(height: 10), // Space for the button
-
-          // Save Button
-          ElevatedButton(
-            onPressed: onSave,
-            child: const Padding(
-              padding: EdgeInsets.all(8.0), // You can adjust padding here
-              child: Center(
-                child: Text('Save'),
+            // Calories Input
+            TextField(
+              controller: widget.caloriesController,
+              decoration: const InputDecoration(
+                labelText: 'Add Calories',
+                border: OutlineInputBorder(),
               ),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                _addCalories();
+              },
             ),
-          )
-        ],
+            const SizedBox(height: 8),
+
+            // Description Input
+            TextField(
+              controller: widget.descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 10),
+
+            // Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: widget.onSave,
+                  child: const Text('Save'),
+                ),
+                ElevatedButton(
+                  onPressed: _hasImage ? _showImagePopup : _takePicture,
+                  child: Text(_hasImage ? 'See Picture' : 'Take Picture'),
+                ),
+                ElevatedButton(
+                  onPressed: _showCaloriesChart,
+                  child: const Text('Show Chart'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
-}
 
+  void _showCaloriesChart() {
+    double dailyGoalCalories = 2000.0;
+    double percentage = (dailyGoalCalories > 0)
+        ? (widget.totalCalories / dailyGoalCalories)
+        : 0.0;
 
-
-
-
-
-
-
-/*
-
-Expanded(child: Container()),
-
-
-StatefulWidget {
-  const PageSix({super.key});
-
-  @override
-  _PageSixState createState() => _PageSixState();
-}
-
-class _PageSixState extends State<PageSix> {
-  final CalendarFormat _calendarFormat = CalendarFormat.week;
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  double _calories = 0.0;
-  String dropdownvalue = 'Breakfast';
-  final TextEditingController breakfastCaloriesController =
-      TextEditingController();
-  final TextEditingController lunchCaloriesController = TextEditingController();
-  final TextEditingController dinnerCaloriesController =
-      TextEditingController();
-  final TextEditingController snackCaloriesController = TextEditingController();
-  final TextEditingController breakfastDescriptionController =
-      TextEditingController();
-  final TextEditingController lunchDescriptionController =
-      TextEditingController();
-  final TextEditingController dinnerDescriptionController =
-      TextEditingController();
-  final TextEditingController snackDescriptionController =
-      TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calorie Tracker Home'),
-      ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 132, // Adjust the height as needed
-            child: TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              calendarFormat: _calendarFormat,
-              availableCalendarFormats: const {
-                CalendarFormat.week: 'Week'
-              }, // Only week view
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay; // update _focusedDay here as well
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              calendarStyle: const CalendarStyle(
-                selectedDecoration: BoxDecoration(
-                  color: Colors.green, // Color the selected day green
-                  shape: BoxShape.circle,
-                ),
-                todayDecoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false, // Hide the format button
-                titleCentered: true,
-                titleTextStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),
-          Expanded(
-            child: Row(
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Calories Chart'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Total'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
+                CircularPercentIndicator(
+                  radius: 120.0,
+                  lineWidth: 12.0,
+                  percent: percentage.clamp(0.0, 1.0),
+                  center: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${widget.totalCalories.toStringAsFixed(0)} cal',
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                       ),
-                    ),
+                      Text(
+                        '${(percentage * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const Text(
+                        'of daily goal',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
                   ),
+                  progressColor: Colors.green,
+                  backgroundColor: Colors.grey[300]!,
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Breakfast'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Meal Description:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Lunch'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
+                Text(
+                  widget.descriptionController.text.isNotEmpty
+                      ? widget.descriptionController.text
+                      : "No description added.",
+                  textAlign: TextAlign.center,
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Dinner'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    child: Flexible(
-                      child: CircularPercentIndicator(
-                        radius: 50.0,
-                        lineWidth: 5.0,
-                        percent: _calories / 2000.0,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_calories.toStringAsFixed(0)} cal',
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              '${(_calories / 2000.0 * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Text('Snack'),
-                          ],
-                        ),
-                        progressColor: Colors.green,
-                        backgroundColor: Colors.grey[300]!,
-                      ),
-                    ),
-                  ),
-                ),          
               ],
             ),
           ),
-          const Divider(
-            thickness: 2, // Adjust the thickness as needed
-            color: Colors.grey, // Adjust the color as needed
-          ),  
-          
-          
-
-           Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      _buildMealCategory(' Breakfast:', breakfastCaloriesController,
-                          breakfastDescriptionController),
-                      _buildDivider(),
-                      _buildMealCategory(' Lunch:', lunchCaloriesController,
-                          lunchDescriptionController),
-                      _buildDivider(),
-                      _buildMealCategory(' Dinner:', dinnerCaloriesController,
-                          dinnerDescriptionController),
-                      _buildDivider(),
-                      _buildMealCategory(' Snack:', snackCaloriesController,
-                          snackDescriptionController),
-                    ],
-                  ),
-                ),
-
-                
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
-  
-  
-  Widget _buildMealCategory(
-      String title,
-      TextEditingController caloriesController,
-      TextEditingController descriptionController) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      
-      children: <Widget>[
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        TextField(
-          controller: caloriesController,
-          decoration: InputDecoration(
-            labelText: 'Calories Used (Placeholder)',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-        ),
-        SizedBox(height: 8),
-        TextField(
-          controller: descriptionController,
-          decoration: InputDecoration(
-            labelText: 'Description',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 4,
-        ),
-        SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Divider(
-      color: Colors.grey,
-      thickness: 1,
-    );
-  }
-}*/
+}
