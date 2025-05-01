@@ -37,8 +37,8 @@ class _BMICalculatorState extends State<BMICalculator> {
 
   void calculateBMI() {
     double weight = double.tryParse(weightController.text) ?? 0;
-    int feet = int.tryParse(feetController.text) ?? 0;
-    int inches = int.tryParse(inchesController.text) ?? 0;
+    double feet = double.tryParse(feetController.text) ?? 0;
+    double inches = double.tryParse(inchesController.text) ?? 0;
 
     if (weight > 0 && feet >= 0 && inches >= 0) {
       // Convert height to inches: total height in inches = feet * 12 + inches
